@@ -36,7 +36,7 @@ class CompanyJobsFinder():
         """
 
         if mobile == True:
-            gecko_driver_path = './Drivers/linux32/geckodriver'
+            gecko_driver_path = './Drivers/linux64/geckodriver'
         else:
             gecko_driver_path = './Drivers/win64/geckodriver.exe'
         
