@@ -8,6 +8,16 @@ run pip install selenium beautifulsoup4
 
 install firefox browser from app store
 
+Move files to Termux home directory (can't move through command line due to restrictions on Termux permissions)
+    install FX file explorer from the app store (recommended by Termux): https://play.google.com/store/apps/details?id=nextapp.fx
+    Connect to Termux storage (pictures aren't exact but are very useful https://imgur.com/a/NDkpeaz):
+        From menu, select "Connect to Storage"
+        Open side-menu to select "Termux"
+        Select "USE THIS FOLDER"
+        Termux home directory is now available to move files to
+        Downlaod project (the .tar.gz version is required for Android)
+        Move downloaded project to Termux home directory
+        run tar -xf <compressed project folder name>
 
 
 Where I left off:
@@ -15,7 +25,7 @@ It looks like I need a file manager to be able to poke around my android phone. 
 I need to figure out how to have easy control over file locations on the phone so that I can troubleshoot and get everything set up.
 It looks like GeckoDriver may work as is on the phone.... Or not. IDFK yet.
 
-install FX file explorer from the app store: https://play.google.com/store/apps/details?id=nextapp.fx
+
 
 
 

@@ -36,13 +36,14 @@ class CompanyJobsFinder():
         """
 
         if mobile == True:
-            gecko_driver_path = './Drivers/linux-aarch64/geckodriver'
+            gecko_driver_path = './Drivers/linux32/geckodriver'
         else:
             gecko_driver_path = './Drivers/win64/geckodriver.exe'
-            service = FirefoxService(executable_path=gecko_driver_path)
-            options = webdriver.FirefoxOptions()
-            options.add_argument("--headless")
-            self.__driver = webdriver.Firefox(service=service, options=options)
+        
+        service = FirefoxService(executable_path=gecko_driver_path)
+        options = webdriver.FirefoxOptions()
+        options.add_argument("--headless")
+        self.__driver = webdriver.Firefox(service=service, options=options)
 
     @property
     def company_name(self):
