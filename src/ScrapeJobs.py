@@ -62,6 +62,15 @@ class CompanyJobsFinder():
         return self.__company_name
     
     @property
+    def url(self):
+        """Getter for company careers page url.
+
+        Returns:
+            string: url for company careers page.
+        """
+        return self.__url
+
+    @property
     def previous_jobs(self):
         """Getter for self.__previous_jobs
 
@@ -78,7 +87,6 @@ class CompanyJobsFinder():
                 self.__previous_jobs = json.load(file)
                 file.close()
 
-    # Get and set current jobs.
     @property
     def current_jobs(self):
         """Getter for self.__current_jobs
@@ -97,7 +105,7 @@ class CompanyJobsFinder():
             identifiable tag for the job information. Defaults to False.
 
         Returns:
-            (list): This is the setter method for self.__current_jobs.
+            list: This is the setter method for self.__current_jobs.
         """
         
         self.__driver.get(self.__url)
@@ -137,17 +145,47 @@ class CompanyJobsFinder():
             json.dump(self.__current_jobs, file, indent=4)
             file.close()
 
+class SendNotifications(CompanyJobsFinder):
+    """A class for organizing notificaiton content and schedules"""
+
+    __company_name = ''
+    __url = ''
+    __new_listings_msg_title = f'Job listings updated for {__company_name}!'
+    __no_listings_msg_title = f'No new jobs at {__company_name}.'
+
+
+    def __init__(self, parent_instance):
+        self.__company_name = parent_instance.company_name
+        self.__url = parent_instance.url
+
+    def send_notification(self, update_detected):
+        cd = str(os.system('pwd'))
+        if cd[-1] == "/":
+            cd = cd[:-1]
+
+        if update_detected == False:
+            os.system(f'termux-notification --title {self.__no_listings_msg_title} --content "Keep eating ramen noodles." --id "big_unemployed" --image-path "{cd}/Media/noJob.jpg" ')
+        else:
+            os.system(f'termux-notification --title {self.__new_listings_msg_title} --content "Tap now to visit the {self.__company_name} careers page." --id "big_employed" --image-path "{cd}/Media/job.jpg" ')
+
 def main():
-    Jagex = CompanyJobsFinder('Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', 'styles--3TJHk')
-    Jagex.set_previous_jobs()
-    Jagex.set_current_jobs_by_class(child=True)
+    # Future idea when tracking 2+ companies. Make a dictionary containing initialization variables (plus mobile and child flag settings).
+    # One dictionary per company, then I can make a list of companies and loop through them to generalize the code below. Everything including instantiation can be generalized.
+
+    jagex = CompanyJobsFinder('Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', 'styles--3TJHk')
+    jagex.set_previous_jobs()
+    jagex.set_current_jobs_by_class(child=True)
+    jagex_notification = SendNotifications(jagex)
 
     # See notes 
-    if Jagex.previous_jobs != Jagex.current_jobs:
-        Jagex.set_current_jobs_json()
-        print(f"Job listings updated for {Jagex.company_name}! Tap now to view listings.")
+    if jagex.previous_jobs == jagex.current_jobs:
+        update_detected = False
+        print(f'No new jobs at {jagex.company_name}Keep eating ramen noodles.') # Diagnostic print line. Comment out for production.
     else:
-        print(f"No new jobs at {Jagex.company_name}Keep eating ramen noodles.")
+        update_detected = True
+        jagex.set_current_jobs_json()
+        print(f'Job listings updated for {jagex.company_name}! Tap now to view listings.')  # Diagnostic print line. Comment out for production.
+    jagex_notification.send_notification(update_detected=update_detected)
 
 if __name__ == '__main__':
     main()
@@ -155,6 +193,7 @@ if __name__ == '__main__':
 
 """
     Notes on notifications:
+    * I need to figure out how to make actions happen when tapping notification.
     * Daily notification at set time either stating nothing was found or something was found for each company
     * Only send notifications on each run if a change was detected
     * Send daily notification of jobs that contain certain keywords
