@@ -1,13 +1,21 @@
+NOTE ABOUT checking ToS and robots.txt to see if they allow scraping.
+
 How to Use:
 
-Download Termux from the app store
-run pkg update && pkg upgrade (select default options when prompted)
-run pkg install python
-run pkg install python-pip
-run pip install selenium beautifulsoup4
-
-install firefox browser from app store
-
+second attempt
+Download and install F-Droid from https://f-droid.org/en/. You may be prompted to set permissions to allow the installation of the .apk file.
+Install Termux Terminal from F-Droid. DO NOT install from Google Play Store as Termux has halted updates through the Google Play Store. You may be prompted to allow app installs from this source.
+Configure Termux (Big thank you to luanon404 at https://github.com/luanon404/Selenium-On-Termux-Android?tab=readme-ov-file):
+Note: Force-quit the app if it begins entering "y" in an infinite loop. It's happened to me on very rare occasions..
+run: yes | pkg update -y && yes | pkg upgrade -y
+run: termux-change-repo and select Mirror group. On the next page, I selected North American mirrors. Use arrow keys, space, and enter to make selections.
+run: yes | pkg install python-pip -y
+run: pip install selenium==4.9.1 beautifulsoup4
+run: yes | pkg install x11-repo -y
+run: yes | pkg install firefox -y
+run: yes | pkg install geckodriver -y
+run: termux-setup-storage and grant permission.
+download the release from my repo. You can either use the command line in Termux to move the download to the home folder (/data/data/com.termux/files/home), or you can do the following:
 Move files to Termux home directory (can't move through command line due to restrictions on Termux permissions)
     install FX file explorer from the app store (recommended by Termux): https://play.google.com/store/apps/details?id=nextapp.fx
     Connect to Termux storage (pictures aren't exact but are very useful https://imgur.com/a/NDkpeaz):
@@ -17,7 +25,7 @@ Move files to Termux home directory (can't move through command line due to rest
         Termux home directory is now available to move files to
         Downlaod project (the .tar.gz version is required for Android)
         Move downloaded project to Termux home directory
-        run tar -xf <compressed project folder name>
+run tar -xf <compressed project folder name>
 
 
 Where I left off:
@@ -37,7 +45,7 @@ Learned:
 If there's too much HTML, you can't print all to the console. Save to a file to see it all.
 Learned about docstrings
 Got to practice building Python classes
-
+Termux halted all updates on google play. Thanks Peter Mortensen on Stack Exchange. You saved my life.
 
 NOTES:
 Have the Android notification take you to the jobs page when clicked (even when no jobs available).

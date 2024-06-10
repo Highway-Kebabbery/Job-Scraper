@@ -1,15 +1,21 @@
+#!/usr/bin/env python
+
+"""Loads a company's provided careers page and uses the provided tag and attribute identifier to scrape job listings.
+    Careers are compared against the last scrape to determine if a change occurred and a notification is sent to the host's phone.
+"""
+
 import os
 import json
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from bs4 import BeautifulSoup
 
 
 class CompanyJobsFinder():
-    """A class for finding job listings available at a company."""
+    """A class for finding and storing job listings available at a company."""
 
     __driver = None
     __company_name = ''
@@ -35,15 +41,16 @@ class CompanyJobsFinder():
             on Win64, don't forget to add the <mobile=False> argument when called in __init__. Defaults to True.
         """
 
-        if mobile == True:
-            gecko_driver_path = './Drivers/linux64/geckodriver'
-        else:
+        if mobile == False:
+            # driver is in environment variables on Android and needs not be called.
             gecko_driver_path = './Drivers/win64/geckodriver.exe'
-        
         service = FirefoxService(executable_path=gecko_driver_path)
         options = webdriver.FirefoxOptions()
         options.add_argument("--headless")
-        self.__driver = webdriver.Firefox(service=service, options=options)
+        if mobile == True:
+            self.__driver = webdriver.Firefox(options=options)
+        else:
+            self.__driver = webdriver.Firefox(service=service, options=options)
 
     @property
     def company_name(self):
@@ -135,11 +142,34 @@ def main():
     Jagex.set_previous_jobs()
     Jagex.set_current_jobs_by_class(child=True)
 
+    # See notes 
     if Jagex.previous_jobs != Jagex.current_jobs:
         Jagex.set_current_jobs_json()
-        print(f"New job found at {Jagex.company_name}!")
+        print(f"Job listings updated for {Jagex.company_name}! Tap now to view listings.")
     else:
-        print("Keep eating ramen noodles.")
+        print(f"No new jobs at {Jagex.company_name}Keep eating ramen noodles.")
 
 if __name__ == '__main__':
     main()
+
+
+"""
+    Notes on notifications:
+    * Daily notification at set time either stating nothing was found or something was found for each company
+    * Only send notifications on each run if a change was detected
+    * Send daily notification of jobs that contain certain keywords
+    * configure notification class to accept scrape/notification times for each job
+"""
+
+
+
+
+"""
+    Notes for future work:
+    * Program currently only checks whether the listings changed. This will register removals as well as new listings. Find a way to notate new listings.
+    * I can probably do something like check to see if each current job is in the past jobs, and if each past job is in the current jobs.
+        * If current job not in pastlistings, BOOM new listing, and I have its name and can store in a variable for use. If past job not in current listings... who cares. Maybe don't check for that after all.
+    * I don't filter for keywords. This is fine for now as I'm targeting smaller companies with fewer listing updates, but for larger companies I'd want to filter new jobs by keyword.
+    * I also only check for updates. I could feasibly use this class to simply check for jobs with certain keywords. For example: scrape company with many listings for jobs, then monitor over time for changes.
+    * I'm going to need to handle instances where there are multiple pages of jobs. Another issue for when I target larger companies. Selenium should make it easy to handle.
+"""
