@@ -51,6 +51,8 @@ If there's too much HTML, you can't print all to the console. Save to a file to 
 Learned about docstrings
 Got to practice building Python classes
 Termux halted all updates on google play. Thanks Peter Mortensen on Stack Exchange. You saved my life.
+Learned how to send a system command from a python script, capture the result, and store it in a variable for later use in the script.
+Learned that os.popen('pwd').read() adds a newline character to the end which gave me a lot of trouble =___=
 
 NOTES:
 Have the Android notification take you to the jobs page when clicked (even when no jobs available).

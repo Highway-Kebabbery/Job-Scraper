@@ -17,6 +17,7 @@ from selenium.webdriver.support import expected_conditions as EC
 class CompanyJobsFinder():
     """A class for finding and storing job listings available at a company."""
 
+    # Scraping and job comparison
     __driver = None
     __company_name = ''
     __url = ''
@@ -25,12 +26,19 @@ class CompanyJobsFinder():
     __current_jobs = []
     __previous_jobs = None
 
+    # Sending notifications
+    __new_listings_msg_title = ''
+    __no_listings_msg_title = ''
+
+
     def __init__(self, company_name, url, target_tag, target_attribute_value):
         self.__company_name = company_name
         self.__url = url
         self.__target_tag = target_tag
         self.__target_attribute_value = target_attribute_value
-        self.set_firefox_driver()
+        self.set_firefox_driver(mobile=False)
+        self.__new_listings_msg_title = f'Job listings updated for {company_name}!'
+        self.__no_listings_msg_title = f'No new jobs at {company_name}.'
     
     def set_firefox_driver(self, mobile=True):
         """Set up the web driver
@@ -44,7 +52,7 @@ class CompanyJobsFinder():
         if mobile == False:
             # driver is in environment variables on Android and needs not be called.
             gecko_driver_path = './Drivers/win64/geckodriver.exe'
-        service = FirefoxService(executable_path=gecko_driver_path)
+            service = FirefoxService(executable_path=gecko_driver_path)
         options = webdriver.FirefoxOptions()
         options.add_argument("--headless")
         if mobile == True:
@@ -145,48 +153,41 @@ class CompanyJobsFinder():
             json.dump(self.__current_jobs, file, indent=4)
             file.close()
 
-class SendNotifications(CompanyJobsFinder):
-    """A class for organizing notificaiton content and schedules"""
-
-    __company_name = ''
-    __url = ''
-    __new_listings_msg_title = f'Job listings updated for {__company_name}!'
-    __no_listings_msg_title = f'No new jobs at {__company_name}.'
-
-
-    def __init__(self, parent_instance):
-        self.__company_name = parent_instance.company_name
-        self.__url = parent_instance.url
-
-    def send_notification(self, update_detected):
-        cd = str(os.system('pwd'))
+    def send_notification(self, update_detected, id_counter):
+        cd = os.popen('pwd').read().strip()
         if cd[-1] == "/":
             cd = cd[:-1]
+        if cd[0] == "/":
+            cd = cd[1:]
 
         if update_detected == False:
-            os.system(f'termux-notification --title {self.__no_listings_msg_title} --content "Keep eating ramen noodles." --id "big_unemployed" --image-path "{cd}/Media/noJob.jpg" ')
+            os.system(f'termux-notification --title "{self.__no_listings_msg_title}" --content "Keep eating ramen noodles." --id big_unemployed{id_counter} --image-path /{cd}/Media/noJob.jpg ')
         else:
-            os.system(f'termux-notification --title {self.__new_listings_msg_title} --content "Tap now to visit the {self.__company_name} careers page." --id "big_employed" --image-path "{cd}/Media/job.jpg" ')
+            os.system(f'termux-notification --title "{self.__new_listings_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --id big_employed{id_counter} --image-path /{cd}/Media/job.jpg ')
 
-def main():
-    # Future idea when tracking 2+ companies. Make a dictionary containing initialization variables (plus mobile and child flag settings).
-    # One dictionary per company, then I can make a list of companies and loop through them to generalize the code below. Everything including instantiation can be generalized.
+def main():  
+    """To add new companies, simply create and fill out a company attributes list then add that list to the list of companies below.
+    """
+    
+    # Company name, careers page url, target tag, target attribute, targeting child of target attribute?
+    jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', 'styles--3TJHk', True]
+    companies = [jagex]
+    
+    for company in companies:
+        company_object = CompanyJobsFinder(company[0], company[1], company[2], company[3])
+        company_object.set_previous_jobs()
+        company_object.set_current_jobs_by_class(child=company[4])
 
-    jagex = CompanyJobsFinder('Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', 'styles--3TJHk')
-    jagex.set_previous_jobs()
-    jagex.set_current_jobs_by_class(child=True)
-    jagex_notification = SendNotifications(jagex)
-
-    # See notes 
-    if jagex.previous_jobs == jagex.current_jobs:
-        update_detected = False
-        print(f'No new jobs at {jagex.company_name}Keep eating ramen noodles.') # Diagnostic print line. Comment out for production.
-    else:
-        update_detected = True
-        jagex.set_current_jobs_json()
-        print(f'Job listings updated for {jagex.company_name}! Tap now to view listings.')  # Diagnostic print line. Comment out for production.
-    jagex_notification.send_notification(update_detected=update_detected)
-
+        if company_object.previous_jobs == company_object.current_jobs:
+            update_detected = False
+            # print(f'No new jobs at {company_object.company_name}. Keep eating ramen noodles.') # Diagnostic print line. Comment out for production.
+        else:
+            update_detected = True
+            company_object.set_current_jobs_json()
+            # print(f'Job listings updated for {company_object.company_name}! Tap now to view listings.')  # Diagnostic print line. Comment out for production.
+        # The index number is appended to the --id attribute used to generate notifications, thus generating a unique notificatoin id per company so the notifications don't overwrite each other.
+        company_object.send_notification(update_detected, companies.index(company))
+        
 if __name__ == '__main__':
     main()
 
@@ -199,8 +200,6 @@ if __name__ == '__main__':
     * Send daily notification of jobs that contain certain keywords
     * configure notification class to accept scrape/notification times for each job
 """
-
-
 
 
 """
