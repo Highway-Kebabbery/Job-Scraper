@@ -24,6 +24,7 @@ class CompanyJobsFinder():
     __url = ''
     __target_tag = ''
     __target_attribute_value = ''
+    __company_data_filepath = ''
     __current_jobs = []
     __previous_jobs = None
 
@@ -42,15 +43,16 @@ class CompanyJobsFinder():
     __termux_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
 
     def __init__(self, company_name, url, target_tag, target_attribute_value, id_counter):
+        self.__set_firefox_driver()   # DON'T FORGET to remove the 'mobile=False' argument when you finish testing on Windows =____=
         self.__company_name = company_name
         self.__url = url
         self.__target_tag = target_tag
         self.__target_attribute_value = target_attribute_value
+        self.__company_data_filepath = './data/' + str(self.__company_name) + '.json'
         self.__new_jobs_today_msg_title = f'Job listings updated today for {company_name}!'
         self.__new_jobs_yesterday_msg_title = f'Job listings updated yesterday for {company_name}!'
         self.__no_jobs_yesterday_msg_title = f'No new jobs yesterday at {company_name}.'
         self.__id_counter = id_counter
-        self.__set_firefox_driver()   # DON'T FORGET to remove the 'mobile=False' argument when you finish testing on Windows =____=
         self.__build_cd()
         self.__no_job_jpg_filepath = f'/{self.__cd}/media/no_job.jpg'
         self.__job_jpg_filepath = f'/{self.__cd}/media/job.jpg'
@@ -117,9 +119,13 @@ class CompanyJobsFinder():
     def set_previous_jobs(self):
         """Setter for self.__previous_jobs
         """
-        if os.path.exists('./data/' + str(self.__company_name) + '.json'):
-            with open('./data/' + str(self.__company_name) + '.json', 'r') as file:
+        if os.path.exists(self.__company_data_filepath):
+            with open(self.__company_data_filepath, 'r') as file:
                 self.__previous_jobs = json.load(file)
+                file.close()
+        else:
+            with open(self.__company_data_filepath) as file:
+                json.dump({"date_json_mod": '', "Update detected": True}, file, indent=4)
                 file.close()
 
     @property
@@ -161,14 +167,14 @@ class CompanyJobsFinder():
         tags = soup.find_all(self.__target_tag, class_=self.__target_attribute_value)
         if child == False:
             for target_tag in tags:
-                self.__current_jobs.append({"Title: ": target_tag.string})
+                self.__current_jobs.append({"Title": target_tag.string})
         else:
             # Pull the string from the child of each uniquely identifiable parent tag.
             # Only works if there's only one child.
             for parent_tag in tags:
-                self.__current_jobs.append({"Title: ": parent_tag.find().string})
+                self.__current_jobs.append({"Title": parent_tag.find().string})
         
-        self.__current_jobs.append({'date_json_mod: ': datetime.now()})
+        self.__current_jobs.append({'date_json_mod': datetime.now()})
         self.__driver.quit()
 
     def dump_current_jobs_json(self, update_detected):
@@ -178,9 +184,9 @@ class CompanyJobsFinder():
             company_name (string): Used to generate filename.
             update_detected (bool): Used tomorrow to determine whether jobs were found today.
         """
-        self.__current_jobs.append({'update_detected: ': update_detected})
-        with open('./data/' + str(self.__company_name) + '.json', 'w') as file:
-            json.dump(self.__current_jobs, file, indent=4)
+        self.__current_jobs.append({'update_detected': update_detected})
+        with open(self.__company_data_filepath, 'w') as file:
+            json.dump(self.__current_jobs, file, indent=4, default=str)    # default=str tells the .json file how to handle non-serializable type, such as datetime. Should be okay here since I know exactly what's getting stored every time.
             file.close()
     
     def send_notification(self, daily_reminder=False):
@@ -317,14 +323,14 @@ if __name__ == '__main__':
 # Still need to set daily messages to schedule a time
 """
     Notes for what I'll call the final project:
-* So for now, I think I have everything in place for Termux that I need to run this.
-    * With scripts in place to easily configure Termux, write test files/scripts to test cron job scheduling, "at" scheduling, and generally the ability to execute scripts.
 
+    * Running `python scrape_jobs.py` gives the script permission to read/write the files I need (./data/<company>.json), but running `chmod +x ./path/to/scape_jobs.py` then `./path/to/scrape_jobs.py` does not give it the permission to do this.
     * completely delete termux and all dependencies to begin testing the configuration script
     * When that works, test the installation script
     * When that works, manually test the scraper.
     * When that works, test the cronjob scheduling script.
     * When that works, Make sure the scraper itself is still working, and check to see that you get your daily notification the next day.
+    * Create a test unit for the entire scraper that runs on Windows to work out scraping the company of your choice before automating it.
     * When that's all done, write the README.md file
     * "Get a job you ******* slob's how he replied" (but realaly, celebrate your accomplishment)
 

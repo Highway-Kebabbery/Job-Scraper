@@ -88,8 +88,11 @@ Second try
         ~~* Added pip install BeautifulSoup to its own line. Testing...~~ That fixed it
 
 Python file isn't creating new file when the file doesn't exist.
-
-
+* This is a permissions issue. When I run `python scrape_jobs.py`, it can read and write, but not when it executes like `./Job-Scraper*/src/scrape_jobs.py`.
+    * Figure out where, how, and for what to set permissions
+* object of type datetime is not json serializable.
+* Line 298 causes an error when there's no existing file. Should I have it check if a file exists and skip the comparison, or should I make code to construct a json file if it doesn't exist when the loop for
+    each company begins?
 
 
 
