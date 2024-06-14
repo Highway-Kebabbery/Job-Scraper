@@ -27,6 +27,7 @@ echo "Starting configuration..."
 yes | pkg update -y
 yes | pkg upgrade -y
 setup_mirrors
+sleep 10
 
 echo "Installing dependencies..."
 yes | pkg install termux-api -y
@@ -36,12 +37,32 @@ yes | pkg install python-pip -y
 yes | pkg install x11-repo -y
 yes | pkg install firefox -y
 yes | pkg install geckodriver -y
-pip install selenium==4.9.1 beautifulsoup4
+pip install selenium==4.9.1
+pip install beautifulsoup4
 echo "dependencies installed"
+sleep 10
 
 # Make the Python and cronjob scheduling scripts executable.
-chmod +x ../scrape_jobs.py
-chmod +x ./_schedule_scrape_jobs.sh
+if [ -f "../scrape_jobs.py" ]; then
+    chmod +x ../scrape_jobs.py
+    echo "Made ../scrape_jobs.py executable"
+else
+    echo "File ../scrape_jobs.py not found"
+fi
+
+sleep 10
+
+if [ -f "./_schedule_scrape_jobs.sh" ]; then
+    chmod +x ./_schedule_scrape_jobs.sh
+    echo "Made ./_schedule_scrape_jobs.sh executable"
+else
+    echo "File ./_schedule_scrape_jobs.sh not found"
+fi
+
+sleep 10
+
+# chmod +x ../scrape_jobs.py
+# chmod +x ./_schedule_scrape_jobs.sh
 
 # Remove .tar.gz file
 rm -r Job-Scraper-*.tar.gz

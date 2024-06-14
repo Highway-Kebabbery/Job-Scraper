@@ -84,7 +84,8 @@ Second try
 * Permissions still failed for both scripts.
 * Running python script says module bs4 not found for import?
     * Ran _setup.sh again... same result. ModuleNotFoundError: No module named 'bs4'
-    
+    * Doesn't see "import BeautifulSoup' either... Must have to do with the setup
+        * Added pip install BeautifulSoup to its own line. Testing...
 
 
 
