@@ -6,7 +6,6 @@
 
 import os
 import json
-import subprocess
 from datetime import date, datetime
 from bs4 import BeautifulSoup
 from selenium import webdriver

@@ -41,7 +41,7 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
     * The extracted project folder MUST be in `/data/data/com.termux/files/home/` to run.
 7. Run: `chmod +x ./<project-folder-name>/src/scripts/_setup.sh` to give the setup script execute permissions.
 8. Run: `./<project-folder-name>/src/scripts/_setup.sh` to configure Termux to run the job scraper.
-9. COMPLETELY exit Termux. To do so, use the `Exit` option in the Termux persistent notification.
+9. When setup finishes, COMPLETELY exit Termux. To do so, use the `Exit` option in the Termux persistent notification.
     * Force quitting the app works, but is not recommended.
 
         <img src="./docs/images/termux-exit.jpg" alt="Termux 'Exit' option shown in the persisten notification." width="200"/>
@@ -73,13 +73,18 @@ A big thank you to [luanon404](https://github.com/luanon404/Selenium-On-Termux-A
 
 
 Initial test results:
-* Instructions at end of _setup.sh were too crowded. Added newlines and exclamation points to help them stand out.
+* ~~Instructions at end of _setup.sh were too crowded. Added newlines and exclamation points to help them stand out.~~
 * _schedule_scrape_jobs.sh wasn't given execute permission. I have a new line `chmod +x _schedule_scrape_jobs.sh` added to hopefully alleviate this. Check for it on next run.
 * scrape_jobs.py was not given execute permission, either... weird.
     * It probably only takes one argument. Test what I have.
-* The job was scheduled successfully. 
-* Had to add shebang to top of scrape_jobs.py
+* The job was scheduled successfully after manually granting execute permission.
+* ~~Had to add shebang to top of scrape_jobs.py~~
 
+Second try
+* Permissions still failed for both scripts.
+* Running python script says module bs4 not found for import?
+    * Ran _setup.sh again... same result. ModuleNotFoundError: No module named 'bs4'
+    
 
 
 
