@@ -74,20 +74,20 @@ A big thank you to [luanon404](https://github.com/luanon404/Selenium-On-Termux-A
 
 Initial test results:
 * ~~Instructions at end of _setup.sh were too crowded. Added newlines and exclamation points to help them stand out.~~
-* _schedule_scrape_jobs.sh wasn't given execute permission. I have a new line `chmod +x _schedule_scrape_jobs.sh` added to hopefully alleviate this. Check for it on next run.
-* scrape_jobs.py was not given execute permission, either... weird.
-    * It probably only takes one argument. Test what I have.
-* The job was scheduled successfully after manually granting execute permission.
+* ~~_schedule_scrape_jobs.sh wasn't given execute permission. I have a new line `chmod +x _schedule_scrape_jobs.sh` added to hopefully alleviate this. Check for it on next run.~~
+* ~~scrape_jobs.py was not given execute permission, either... weird.~~
+  ~~  * It probably only takes one argument. Test what I have.~~
+~~* The job was scheduled successfully after manually granting execute permission.~~
 * ~~Had to add shebang to top of scrape_jobs.py~~
 
 Second try
-* Permissions still failed for both scripts.
-* Running python script says module bs4 not found for import?
-    * Ran _setup.sh again... same result. ModuleNotFoundError: No module named 'bs4'
-    * Doesn't see "import BeautifulSoup' either... Must have to do with the setup
-        * Added pip install BeautifulSoup to its own line. Testing...
+* ~~Permissions still failed for both scripts.~~
+~~* Running python script says module bs4 not found for import?~~
+    * ~~Ran _setup.sh again... same result. ModuleNotFoundError: No module named 'bs4'~~
+    * ~~Doesn't see "import BeautifulSoup' either... Must have to do with the setup~~
+        ~~* Added pip install BeautifulSoup to its own line. Testing...~~ That fixed it
 
-
+Python file isn't creating new file when the file doesn't exist.
 
 
 
