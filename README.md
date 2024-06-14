@@ -39,27 +39,49 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
 5. Run: `ls`. You should see the compressed project folder.
 6. Run: `tar -xf <project-folder-name.tar.gz>` to extract the files here.
     * The extracted project folder MUST be in `/data/data/com.termux/files/home/` to run.
+7. Run: `chmod +x ./<project-folder-name>/src/scripts/_setup.sh` to give the setup script execute permissions.
+8. Run: `./<project-folder-name>/src/scripts/_setup.sh` to configure Termux to run the job scraper.
+9. COMPLETELY exit Termux. To do so, use the `Exit` option in the Termux persistent notification.
+    * Force quitting the app works, but is not recommended.
 
-
-***#$$$$$$$$$$$$&&^%#$%$%NOTE: INSTALLATION IS VALIDATED THROUGH HERE. I STILL NEED TO TEST THE STEPS BELOW.***
-
-For the first execution:
-
-7. Run: `chmod +x ./<project-folder-name>/src/scripts/setup.sh` to give the setup script execute permissions.
-8. Run: `./<project-folder-name>/src/scripts/setup.sh` to configure Termux to run the job scraper.
+        <img src="./docs/images/termux-exit.jpg" alt="Termux 'Exit' option shown in the persisten notification." width="200"/>
 
 For subsequent executions if the job is stopped:
 
-9. Open Termux and ensure you're in the home directory. Run `./<project-folder-name>/src/scripts/schedule_scrape_jobs.sh`.
+9. Open Termux and ensure you're in the home directory. Run `./<project-folder-name>/src/scripts/_schedule_scrape_jobs.sh`.
 
 ******HEYHEYHEY HEY HEY HERE'S A NOTE. LET THEM KNOW ABOUT POTENTIAL SETUP ERROS.
 *****Note: Force-quit the app if it begins entering "y" in an infinite loop. It's happened to me on very rare occasions.
 Note about having mirror groups for NA, SA, and Europe. Recommend reordering them based on location.
+Note in the README about how to add new companies
+Note in README about how to change frequency
 
 A big thank you to [luanon404](https://github.com/luanon404/Selenium-On-Termux-Android?tab=readme-ov-file) for their help with getting Termux set up for Selenium.
 
 ***BE SURE TO ADD A NOTE ABOUT ADDING NEW COMPANIES
 ***Will need to add screen recording of the app working when it's all running in the final implementation.
+
+
+
+
+
+
+
+
+
+
+
+
+Initial test results:
+* Instructions at end of _setup.sh were too crowded. Added newlines and exclamation points to help them stand out.
+* _schedule_scrape_jobs.sh wasn't given execute permission. I have a new line `chmod +x _schedule_scrape_jobs.sh` added to hopefully alleviate this. Check for it on next run.
+* scrape_jobs.py was not given execute permission, either... weird.
+    * It probably only takes one argument. Test what I have.
+* The job was scheduled successfully. 
+* Had to add shebang to top of scrape_jobs.py
+
+
+
 
 
 

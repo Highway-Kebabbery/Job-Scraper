@@ -1,3 +1,5 @@
+#!/data/data/com.termux/files/usr/bin/python
+
 """Loads a company's provided careers page and uses the provided tag and attribute identifier to scrape job listings.
     Careers are compared against the last scrape to determine if a change occurred and a notification is sent to the host's phone.
 """
