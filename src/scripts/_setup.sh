@@ -27,7 +27,6 @@ echo "Starting configuration..."
 yes | pkg update -y
 yes | pkg upgrade -y
 setup_mirrors
-sleep 10
 
 echo "Installing dependencies..."
 yes | pkg install termux-api -y
@@ -40,32 +39,13 @@ yes | pkg install geckodriver -y
 pip install selenium==4.9.1
 pip install beautifulsoup4
 echo "dependencies installed"
-sleep 10
-
-# Make the Python and cronjob scheduling scripts executable.
-if [ -f "../scrape_jobs.py" ]; then
-    chmod +x ../scrape_jobs.py
-    echo "Made ../scrape_jobs.py executable"
-else
-    echo "File ../scrape_jobs.py not found"
-fi
-
-sleep 10
-
-if [ -f "./_schedule_scrape_jobs.sh" ]; then
-    chmod +x ./_schedule_scrape_jobs.sh
-    echo "Made ./_schedule_scrape_jobs.sh executable"
-else
-    echo "File ./_schedule_scrape_jobs.sh not found"
-fi
-
-sleep 10
-
-# chmod +x ../scrape_jobs.py
-# chmod +x ./_schedule_scrape_jobs.sh
 
 # Remove .tar.gz file
 rm -r Job-Scraper-*.tar.gz
+
+# Make the Python and cronjob scheduling scripts executable.
+chmod +x ./Job-Scraper-*/src/scrape_jobs.py
+chmod +x ./Job-Scraper-*/src/scripts/_schedule_scrape_jobs.sh
 
 run: termux-setup-storage and grant permission. # Technically optional. Gives Termux ability to see device storage folder.
 yes | pkg install termux-services -y # YOU HAVE TO FULLY EXIT THE APP AFTER INSTALLING TERMUX-SERVICES.
