@@ -30,7 +30,7 @@ class CompanyJobsFinder():
     __new_jobs_today_msg_title = ''
     __new_jobs_yesterday_msg_title = ''
     __no_jobs_yesterday_msg_title = ''
-    __notification_content = ''
+    __notification_command = ''
     __id_counter = int()    # The index of the company in the list of companies to check. Appends to various objects to give each company a unique number so company actions don't overwrite one another.
 
     # filepaths
@@ -38,7 +38,7 @@ class CompanyJobsFinder():
     __no_job_jpg_filepath = ''
     __job_jpg_filepath = ''
     __notification_script_filepath = ''
-    __shell_interpreter_path = '#!/data/data/com.termux/files/usr/bin/bash'
+    __termux_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
 
     def __init__(self, company_name, url, target_tag, target_attribute_value, id_counter):
         self.__company_name = company_name
@@ -191,25 +191,25 @@ class CompanyJobsFinder():
         # Choose content of the notification
         if daily_reminder == True:
             if self.__previous_jobs['update_detected'] == False:    # Most likely message to occur
-                self.__notification_content = f'termux-notification --title "{self.__no_jobs_yesterday_msg_title}" --content "Keep eating ramen noodles." --id big_unemployed-daily-{self.__id_counter} --image-path {self.__no_job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_unemployed-daily-{self.__id_counter}" '
+                self.__notification_command = f'termux-notification --title "{self.__no_jobs_yesterday_msg_title}" --content "Keep eating ramen noodles." --id big_unemployed-daily-{self.__id_counter} --image-path {self.__no_job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_unemployed-daily-{self.__id_counter}" '
             else:
-                self.__notification_content = f'termux-notification --title "{self.__new_jobs_yesterday_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-daily-{self.__id_counter} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-daily-{self.__id_counter}" '
+                self.__notification_command = f'termux-notification --title "{self.__new_jobs_yesterday_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-daily-{self.__id_counter} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-daily-{self.__id_counter}" '
         else:
-            self.__notification_content = f'termux-notification --title "{self.__new_jobs_today_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-{self.__id_counter} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-{self.__id_counter}" '
+            self.__notification_command = f'termux-notification --title "{self.__new_jobs_today_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-{self.__id_counter} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-{self.__id_counter}" '
         
         # Send the notification
         if daily_reminder == True:
             self.__build_notif_shell_script()
             self.__schedule_daily_notification()
         else:
-            os.system(f'{self.__notification_content}')
+            os.system(f'{self.__notification_command}')
 
     def __build_notif_shell_script(self):
         """Builds the shell script to send the daily notification at the scheduled time.
         """
         with open(self.__notification_script_filepath, 'w') as file:
-            file.write(f'{self.__shell_interpreter_path}\n')
-            file.write(f'{self.__notification_content}\n')
+            file.write(f'{self.__termux_shebang}\n')
+            file.write(f'{self.__notification_command}\n')
             file.close()
         os.system(f'chmod +x {self.__notification_script_filepath}')    # Set script to be executable
 
@@ -219,6 +219,8 @@ class CompanyJobsFinder():
         current_time = datetime.now()
         notification_time = current_time.replace(hour=10, minute=0, second=0, microsecond=0)
 
+        os.system('echo sv-enable atd')    # enable at daemon
+        os.system('sv up atd')    # start at service for one job
         os.system(f'echo "{self.__notification_script_filepath}" | at {notification_time.strftime("%H:%M %m/%d/%Y")}')
 
 class LogExecution():
@@ -315,12 +317,12 @@ if __name__ == '__main__':
 """
     Notes for what I'll call the final project:
 * So for now, I think I have everything in place for Termux that I need to run this.
-    * Write a separate shell script for the actual process of making the cron job. initial-setup.sh will call this, but users can runthis file to re-start the program after initial setup is completed.
-    * Write the shell script to configure Termux. This will be the user entry point for the script (e.g. "Run ./job_scraper/src/scripts/initial-setup.sh in Termux")
     * With scripts in place to easily configure Termux, write test files/scripts to test cron job scheduling, "at" scheduling, and generally the ability to execute scripts.
 
     * completely delete termux and all dependencies to begin testing the configuration script
     * When that works, test the installation script
+    * When that works, manually test the scraper.
+    * When that works, test the cronjob scheduling script.
     * When that works, Make sure the scraper itself is still working, and check to see that you get your daily notification the next day.
     * When that's all done, write the README.md file
     * "Get a job you ******* slob's how he replied" (but realaly, celebrate your accomplishment)
