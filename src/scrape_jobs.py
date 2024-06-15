@@ -26,7 +26,7 @@ class CompanyJobsFinder():
     __target_attribute_value = ''
     __company_data_filepath = ''
     __current_jobs = []
-    __previous_jobs = None
+    __previous_jobs = []
 
     # Sending notifications
     __new_jobs_today_msg_title = ''
@@ -121,14 +121,14 @@ class CompanyJobsFinder():
         """
 
         # Create new file on first run for a given company.
-        if not os.path.exists(self.__company_data_filepath):
+        if not os.path.exists(self.__company_data_filepath):    # As I understand it, it's a security risk to test a file before opening it because it can create race conditions. That looks like a whole lot of stuff I need to read about later.
             with open(self.__company_data_filepath, 'w') as file:
-                json.dump([{'Titles': []}, {"date_json_mod": datetime.now() - timedelta(days = 1)}, {"update_detected": True}], file, indent=4, default=str)   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
+                json.dump({'Titles': [], "date_json_mod": datetime.now() - timedelta(days = 1), "update_detected": True}, file, indent=4, default=str)   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
                 file.close()
         
         with open(self.__company_data_filepath, 'r') as file:
             self.__previous_jobs = json.load(file)
-            file.close()                
+            file.close()
 
     @property
     def current_jobs(self):
@@ -164,17 +164,17 @@ class CompanyJobsFinder():
         
         html = self.__driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
-        
+
         # Locate job titles.
         tags = soup.find_all(self.__target_tag, class_=self.__target_attribute_value)
         if child == False:
             for target_tag in tags:
-                self.__current_jobs.append({"Title": target_tag.string})
+                self.__current_jobs.append(target_tag.string)
         else:
             # Pull the string from the child of each uniquely identifiable parent tag.
             # Only works if there's only one child.
             for parent_tag in tags:
-                self.__current_jobs.append({"Title": parent_tag.find().string})
+                self.__current_jobs.append(parent_tag.find().string)
         
         self.__driver.quit()
 
@@ -187,10 +187,10 @@ class CompanyJobsFinder():
         """
 
         # Structure the data for .json export
-        self.__current_jobs = [{'Titles': self.__current_jobs}]
-        self.__current_jobs.append({'date_json_mod': datetime.now()})
-        self.__current_jobs.append({'update_detected': update_detected})
-        
+        self.__current_jobs = {'Titles': self.__current_jobs}
+        self.__current_jobs['date_json_mod'] = datetime.now()
+        self.__current_jobs['update_detected'] = update_detected
+
         with open(self.__company_data_filepath, 'w') as file:
             json.dump(self.__current_jobs, file, indent=4, default=str)    # default=str tells the .json file how to handle non-serializable type, such as datetime. Should be okay here since I know exactly what's getting stored every time.
             file.close()
@@ -307,7 +307,7 @@ def main():
             company_object.dump_current_jobs_json(update_detected)
         
         # Send notifications
-        if datetime.strptime(company_object.previous_jobs['date_json_mod'], '%H:%M %m/%d/%Y').date() != date.today():
+        if datetime.strptime(company_object.previous_jobs['date_json_mod'], '%Y-%m-%d %H:%M:%S.%f').date() != date.today():
             # First execution of the day prepares the daily notification.
             if company_object.previous_jobs['update_detected'] == False:
                 company_object.send_notification(daily_reminder=True)
