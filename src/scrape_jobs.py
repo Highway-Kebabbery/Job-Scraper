@@ -121,9 +121,10 @@ class CompanyJobsFinder():
         """
 
         # Create new file on first run for a given company.
+        # Try to rewrite it as Try (open) except (make new file) else (load existing file) finally (file close) after everything else works.
         if not os.path.exists(self.__company_data_filepath):    # As I understand it, it's a security risk to test a file before opening it because it can create race conditions. That looks like a whole lot of stuff I need to read about later.
             with open(self.__company_data_filepath, 'w') as file:
-                json.dump({'Titles': [], "date_json_mod": datetime.now() - timedelta(days = 1), "update_detected": True}, file, indent=4, default=str)   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
+                json.dump({'Titles': [], "date_json_mod": datetime.now() - timedelta(days=1), "update_detected": True}, file, indent=4, default=str)   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
                 file.close()
         
         with open(self.__company_data_filepath, 'r') as file:
@@ -224,13 +225,16 @@ class CompanyJobsFinder():
             file.write(f'{self.__termux_shebang}\n')
             file.write(f'{self.__notification_command}\n')
             file.close()
-        os.system(f'chmod +x {self.__notification_script_filepath}')    # Set script to be executable
+        os.system(f'chmod +x {self.__notification_script_filepath}')
 
     def __schedule_daily_notification(self):
         """Schedule the daily notification
         """
         current_time = datetime.now()
         notification_time = current_time.replace(hour=10, minute=0, second=0, microsecond=0)
+
+        if current_time > notification_time:
+            notification_time = current_time + timedelta(days=1)    # Can't go back in time to send a notification.
 
         os.system('echo sv-enable atd')    # enable at daemon
         os.system('sv up atd')    # start at service for one job
