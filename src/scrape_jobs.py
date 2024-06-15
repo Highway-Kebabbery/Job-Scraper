@@ -119,15 +119,16 @@ class CompanyJobsFinder():
     def set_previous_jobs(self):
         """Setter for self.__previous_jobs
         """
-        if os.path.exists(self.__company_data_filepath):
-            with open(self.__company_data_filepath, 'r') as file:
-                self.__previous_jobs = json.load(file)
-                file.close()
-                # del self.__previous_jobs['date_json_mod', 'update_detected']    # We only want to compare job titles. Obviously the date has changed since the last execution. I think I can get away with comparing ..prevjobs[Titles] to currjobs[Titles] now
-        else:
+
+        # Create new file on first run for a given company.
+        if not os.path.exists(self.__company_data_filepath):
             with open(self.__company_data_filepath, 'w') as file:
                 json.dump([{'Titles': []}, {"date_json_mod": datetime.now() - timedelta(days = 1)}, {"update_detected": True}], file, indent=4, default=str)   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
                 file.close()
+        
+        with open(self.__company_data_filepath, 'r') as file:
+            self.__previous_jobs = json.load(file)
+            file.close()                
 
     @property
     def current_jobs(self):
