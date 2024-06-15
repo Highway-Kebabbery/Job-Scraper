@@ -277,7 +277,7 @@ class LogExecution():
     def write_execution_txt(self):
         self.__log_timestamp(start=False)
         self.__calc_total_time()
-        with open(self.__execution_log_filepath, 'w') as file:
+        with open(self.__execution_log_filepath, 'a') as file:
             file.write(f'Start Time: {self.__start_time}, Stop Time: {self.__stop_time}, Total Time: {self.__total_time}, Companies Analyzed: {self.__number_of_companies}, Average Time per Company: {self.__total_time / self.__number_of_companies}\n')
             file.close()
 

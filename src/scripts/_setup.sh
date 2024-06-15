@@ -49,9 +49,11 @@ chmod +x ./Job-Scraper-*/src/scripts/_schedule_scrape_jobs.sh
 
 termux-setup-storage    # Technically optional. Gives Termux ability to see device storage folder. Need to exit to complete setup.
 yes | pkg install termux-services -y    # YOU HAVE TO FULLY EXIT THE APP AFTER INSTALLING TERMUX-SERVICES.
+source $PREFIX/etc/profile.d/start-services.sh    # Ahhh actually, it seems you may not need to restart if you run this.
 
-echo -e "\n\n!!!!!!!\n"
-echo -e "ATTENTION: Termux requires a full restart. Completely EXIT the app now.\n"
-echo -e "!!!!!!!\n\n"
-echo -e "Upon restart, execute ./<Job-Scraper-x.x>/src/scripts/_schedule_scrape_jobs.sh" to begin running the job scraper.
-sleep 30
+echo -e "\n\nSetup complete."
+#echo -e "\n\n!!!!!!!\n"
+#echo -e "ATTENTION: Termux requires a full restart. Completely EXIT the app now.\n"
+#echo -e "!!!!!!!\n\n"
+#echo -e "Upon restart, execute ./<Job-Scraper-x.x>/src/scripts/_schedule_scrape_jobs.sh" to begin running the job scraper.
+#sleep 30
