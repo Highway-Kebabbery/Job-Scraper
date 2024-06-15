@@ -283,9 +283,7 @@ class LogExecution():
         self.__log_timestamp(start=False)
         self.__calc_total_time()
         self.__time_per_company = self.__total_time / self.__number_of_companies
-        csv_data = [
-            [self.__start_time, self.__stop_time, self.__total_time, self.__number_of_companies, self.__time_per_company]
-            ]
+        csv_data = [self.__start_time, self.__stop_time, self.__total_time, self.__number_of_companies, self.__time_per_company]
         
         try:
             with open(self.__execution_log_filepath, 'r', newline='') as file:
@@ -294,8 +292,8 @@ class LogExecution():
             headers = ['Start Time', 'Stop Time', 'Total Time', 'Companies Analyzed', 'Average Time per Company']
             with open(self.__execution_log_filepath, 'w', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerows(headers)
-                writer.writerows(csv_data)
+                writer.writerow(headers)
+                writer.writerow(csv_data)
                 file.close()
         else:
             with open(self.__execution_log_filepath, 'w', newline='') as file:
