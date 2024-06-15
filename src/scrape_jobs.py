@@ -56,7 +56,7 @@ class CompanyJobsFinder():
         self.__build_cd()
         self.__no_job_jpg_filepath = f'/{self.__cd}/media/no_job.jpg'
         self.__job_jpg_filepath = f'/{self.__cd}/media/job.jpg'
-        self.__notification_script_filepath = f'/{self.__cd}/scripts/daily-notify-{self.__id_counter}.sh'
+        self.__notification_script_filepath = f'/{self.__cd}/scripts/daily_notify_{company_name}_{self.__id_counter}.sh'
     
     def __set_firefox_driver(self, mobile=True):
         """Set up the web driver
@@ -336,10 +336,7 @@ if __name__ == '__main__':
 
     * Running `python scrape_jobs.py` gives the script permission to read/write the files I need (./data/<company>.json), but running `chmod +x ./path/to/scape_jobs.py` then `./path/to/scrape_jobs.py` does not give it the permission to do this.
     * completely delete termux and all dependencies to begin testing the configuration script
-    * When that works, test the installation script
-    * When that works, manually test the scraper.
-    * When that works, test the cronjob scheduling script.
-    * When that works, Make sure the scraper itself is still working, and check to see that you get your daily notification the next day.
+    
     * Create a test unit for the entire scraper that runs on Windows to work out scraping the company of your choice before automating it.
     * When that's all done, write the README.md file
     * "Get a job you ******* slob's how he replied" (but realaly, celebrate your accomplishment)
