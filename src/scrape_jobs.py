@@ -6,7 +6,7 @@
 
 import os
 import json
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -123,9 +123,10 @@ class CompanyJobsFinder():
             with open(self.__company_data_filepath, 'r') as file:
                 self.__previous_jobs = json.load(file)
                 file.close()
+                del self.__previous_jobs['date_json_mod', 'update_detected']    # We only want to compare job titles. Obviously the date has changed since the last execution.
         else:
-            with open(self.__company_data_filepath) as file:
-                json.dump({"date_json_mod": '', "Update detected": True}, file, indent=4)
+            with open(self.__company_data_filepath, 'w') as file:
+                json.dump({"date_json_mod": datetime.now() - timedelta(days = 1), "update_detected": True}, file, indent=4)   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
                 file.close()
 
     @property
@@ -174,7 +175,6 @@ class CompanyJobsFinder():
             for parent_tag in tags:
                 self.__current_jobs.append({"Title": parent_tag.find().string})
         
-        self.__current_jobs.append({'date_json_mod': datetime.now()})
         self.__driver.quit()
 
     def dump_current_jobs_json(self, update_detected):
@@ -184,6 +184,7 @@ class CompanyJobsFinder():
             company_name (string): Used to generate filename.
             update_detected (bool): Used tomorrow to determine whether jobs were found today.
         """
+        self.__current_jobs.append({'date_json_mod': datetime.now()})
         self.__current_jobs.append({'update_detected': update_detected})
         with open(self.__company_data_filepath, 'w') as file:
             json.dump(self.__current_jobs, file, indent=4, default=str)    # default=str tells the .json file how to handle non-serializable type, such as datetime. Should be okay here since I know exactly what's getting stored every time.
@@ -301,7 +302,7 @@ def main():
             company_object.dump_current_jobs_json(update_detected)
         
         # Send notifications
-        if company_object.previous_jobs['date_json_mod'].date() != date.today():
+        if datetime.strptime(company_object.previous_jobs['date_json_mod'], '%H:%M %m/%d/%Y').date() != date.today():
             # First execution of the day prepares the daily notification.
             if company_object.previous_jobs['update_detected'] == False:
                 company_object.send_notification(daily_reminder=True)
