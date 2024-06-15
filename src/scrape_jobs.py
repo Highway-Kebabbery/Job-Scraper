@@ -296,9 +296,9 @@ class LogExecution():
                 writer.writerow(csv_data)
                 file.close()
         else:
-            with open(self.__execution_log_filepath, 'w', newline='') as file:
+            with open(self.__execution_log_filepath, 'a', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerows(csv_data)
+                writer.writerow(csv_data)
                 file.close()
 
     def __calc_total_time(self):
