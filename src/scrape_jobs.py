@@ -230,7 +230,7 @@ class CompanyJobsFinder():
             file.write(f'{self.__termux_shebang}\n\n')
             file.write(f'{self.__notification_command}\n\n')
             file.close()
-        os.system(f'chmod +x {self.__notification_script_filepath}')
+        os.system(f'chmod 755 {self.__notification_script_filepath}')
 
     def __schedule_daily_notification(self):
         """Schedule the daily notification
