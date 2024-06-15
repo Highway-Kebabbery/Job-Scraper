@@ -283,7 +283,9 @@ class LogExecution():
         self.__log_timestamp(start=False)
         self.__calc_total_time()
         self.__time_per_company = self.__total_time / self.__number_of_companies
-        csv_data = [self.__start_time, self.__stop_time, self.__total_time, self.__number_of_companies, self.__time_per_company]
+        csv_data = [
+            [self.__start_time, self.__stop_time, self.__total_time, self.__number_of_companies, self.__time_per_company]
+            ]
         
         try:
             with open(self.__execution_log_filepath, 'r', newline='') as file:
