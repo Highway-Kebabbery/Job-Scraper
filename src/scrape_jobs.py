@@ -42,8 +42,11 @@ class CompanyJobsFinder():
     __notification_script_filepath = ''
     __termux_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
 
+    # Writing to .json
+    __first_json_dump = bool    # Everything works on Windows without this trickery. In Termux upon initial creation of the .json, the entire contents are recursively dumped into the empty list paired to the first key... it's really weird, it shouldn't happen, and this stupid trick avoids it. I'm mad about it.
+
     def __init__(self, company_name, url, target_tag, target_attribute_value, id_counter):
-        self.__set_firefox_driver()   # DON'T FORGET to remove the 'mobile=False' argument when you finish testing on Windows =____=
+        self.__set_firefox_driver(mobile=False)   # DON'T FORGET to remove the 'mobile=False' argument when you finish testing on Windows =____=
         self.__company_name = company_name
         self.__url = url
         self.__target_tag = target_tag
@@ -123,13 +126,12 @@ class CompanyJobsFinder():
         # Create new file on first run for a given company.
         # Try to rewrite it as Try (open) except (make new file) else (load existing file) finally (file close) after everything else works.
         if not os.path.exists(self.__company_data_filepath):    # As I understand it, it's a security risk to test a file before opening it because it can create race conditions. That looks like a whole lot of stuff I need to read about later.
-            with open(self.__company_data_filepath, 'w') as file:
-                json.dump({'Titles': [], "date_json_mod": datetime.now() - timedelta(days=1), "update_detected": True}, file, indent=4, default=str)   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
+                self.__previous_jobs = {'Titles': [], "date_json_mod": str(datetime.now() - timedelta(days=1)), "update_detected": True}   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
+                self.__first_json_dump = True
+        else:
+            with open(self.__company_data_filepath, 'r') as file:
+                self.__previous_jobs = json.load(file)
                 file.close()
-        
-        with open(self.__company_data_filepath, 'r') as file:
-            self.__previous_jobs = json.load(file)
-            file.close()
 
     @property
     def current_jobs(self):
@@ -187,14 +189,17 @@ class CompanyJobsFinder():
             update_detected (bool): Used tomorrow to determine whether jobs were found today.
         """
 
-        # Structure the data for .json export
-        self.__current_jobs = {'Titles': self.__current_jobs}
-        self.__current_jobs['date_json_mod'] = datetime.now()
-        self.__current_jobs['update_detected'] = update_detected
+        json_formatted_data = {'Titles':self.__current_jobs, 'date_json_mod':datetime.now(), 'update_detected':update_detected}
 
         with open(self.__company_data_filepath, 'w') as file:
-            json.dump(self.__current_jobs, file, indent=4, default=str)    # default=str tells the .json file how to handle non-serializable type, such as datetime. Should be okay here since I know exactly what's getting stored every time.
+            json.dump(json_formatted_data, file, indent=4, default=str)    # default=str tells the .json file how to handle non-serializable type, such as datetime. Should be okay here since I know exactly what's getting stored every time.
             file.close()
+        
+        # The initial creation/writing to the .json has weird recursive effects in Termus (Windows functions as expected). Writing to it twice fixes it...
+        if self.__first_json_dump == True:
+            with open(self.__company_data_filepath, 'w') as file:
+                json.dump(json_formatted_data, file, indent=4, default=str)    # default=str tells the .json file how to handle non-serializable type, such as datetime. Should be okay here since I know exactly what's getting stored every time.
+                file.close()
     
     def send_notification(self, daily_reminder=False):
         """Build and send notifications about the status of job listings at the company.
@@ -234,9 +239,9 @@ class CompanyJobsFinder():
         notification_time = current_time.replace(hour=10, minute=0, second=0, microsecond=0)
 
         if current_time > notification_time:
-            notification_time = current_time + timedelta(days=1)    # Can't go back in time to send a notification.
+            notification_time = notification_time + timedelta(days=1)    # Can't go back in time to send a notification.
 
-        os.system('echo sv-enable atd')    # enable at daemon
+        os.system('sv-enable atd')    # enable at daemon
         os.system('sv up atd')    # start at service for one job
         os.system(f'echo "{self.__notification_script_filepath}" | at {notification_time.strftime("%H:%M %m/%d/%Y")}')
 
