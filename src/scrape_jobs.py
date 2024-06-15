@@ -123,10 +123,10 @@ class CompanyJobsFinder():
             with open(self.__company_data_filepath, 'r') as file:
                 self.__previous_jobs = json.load(file)
                 file.close()
-                del self.__previous_jobs['date_json_mod', 'update_detected']    # We only want to compare job titles. Obviously the date has changed since the last execution.
+                # del self.__previous_jobs['date_json_mod', 'update_detected']    # We only want to compare job titles. Obviously the date has changed since the last execution. I think I can get away with comparing ..prevjobs[Titles] to currjobs[Titles] now
         else:
             with open(self.__company_data_filepath, 'w') as file:
-                json.dump({"date_json_mod": datetime.now() - timedelta(days = 1), "update_detected": True}, file, indent=4)   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
+                json.dump([{'Titles': []}, {"date_json_mod": datetime.now() - timedelta(days = 1)}, {"update_detected": True}], file, indent=4, default=str)   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
                 file.close()
 
     @property
@@ -184,8 +184,12 @@ class CompanyJobsFinder():
             company_name (string): Used to generate filename.
             update_detected (bool): Used tomorrow to determine whether jobs were found today.
         """
+
+        # Structure the data for .json export
+        self.__current_jobs = [{'Titles': self.__current_jobs}]
         self.__current_jobs.append({'date_json_mod': datetime.now()})
         self.__current_jobs.append({'update_detected': update_detected})
+        
         with open(self.__company_data_filepath, 'w') as file:
             json.dump(self.__current_jobs, file, indent=4, default=str)    # default=str tells the .json file how to handle non-serializable type, such as datetime. Should be okay here since I know exactly what's getting stored every time.
             file.close()
@@ -297,7 +301,7 @@ def main():
         company_object.set_previous_jobs()
         company_object.set_current_jobs_by_class(child=company[4])
 
-        if company_object.previous_jobs != company_object.current_jobs:
+        if company_object.previous_jobs['Titles'] != company_object.current_jobs:
             update_detected = True
             company_object.dump_current_jobs_json(update_detected)
         
