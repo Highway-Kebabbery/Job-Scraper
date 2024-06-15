@@ -44,16 +44,15 @@ echo "dependencies installed"
 rm -r Job-Scraper-*.tar.gz
 
 # This uh... won't work if they download more than one version of the project. Oops.
-chmod +x ./Job-Scraper-*/src/scrape_jobs.py
-chmod +x ./Job-Scraper-*/src/scripts/_schedule_scrape_jobs.sh
+# OIIIIIII. I'm going to try setting 755 permissions for the entire project folder instead of just _setup.sh in the beginning. These may be obselete after that.
+#chmod 755 ./Job-Scraper-*/src/scrape_jobs.py
+#chmod 755 ./Job-Scraper-*/src/scripts/_schedule_scrape_jobs.sh
 
 termux-setup-storage    # Technically optional. Gives Termux ability to see device storage folder. Need to exit to complete setup.
 yes | pkg install termux-services -y    # YOU HAVE TO FULLY EXIT THE APP AFTER INSTALLING TERMUX-SERVICES.
-source $PREFIX/etc/profile.d/start-services.sh    # Ahhh actually, it seems you may not need to restart if you run this.
 
-echo -e "\n\nSetup complete."
-#echo -e "\n\n!!!!!!!\n"
-#echo -e "ATTENTION: Termux requires a full restart. Completely EXIT the app now.\n"
-#echo -e "!!!!!!!\n\n"
-#echo -e "Upon restart, execute ./<Job-Scraper-x.x>/src/scripts/_schedule_scrape_jobs.sh" to begin running the job scraper.
-#sleep 30
+echo -e "\n\n!!!!!!!\n"
+echo -e "ATTENTION: Termux requires a full restart. Completely EXIT the app now.\n"
+echo -e "!!!!!!!\n\n"
+echo -e "Upon restart, execute ./<Job-Scraper-x.x>/src/scripts/_schedule_scrape_jobs.sh" to begin running the job scraper.
+sleep 30

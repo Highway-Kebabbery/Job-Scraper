@@ -46,7 +46,7 @@ class CompanyJobsFinder():
     __first_json_dump = bool    # Everything works on Windows without this trickery. In Termux upon initial creation of the .json, the entire contents are recursively dumped into the empty list paired to the first key... it's really weird, it shouldn't happen, and this stupid trick avoids it. I'm mad about it.
 
     def __init__(self, company_name, url, target_tag, target_attribute_value, id_counter):
-        self.__set_firefox_driver(mobile=False)   # DON'T FORGET to remove the 'mobile=False' argument when you finish testing on Windows =____=
+        self.__set_firefox_driver()   # DON'T FORGET to remove the 'mobile=False' argument when you finish testing on Windows =____=
         self.__company_name = company_name
         self.__url = url
         self.__target_tag = target_tag
@@ -227,8 +227,8 @@ class CompanyJobsFinder():
         """Builds the shell script to send the daily notification at the scheduled time.
         """
         with open(self.__notification_script_filepath, 'w') as file:
-            file.write(f'{self.__termux_shebang}\n')
-            file.write(f'{self.__notification_command}\n')
+            file.write(f'{self.__termux_shebang}\n\n')
+            file.write(f'{self.__notification_command}\n\n')
             file.close()
         os.system(f'chmod +x {self.__notification_script_filepath}')
 
