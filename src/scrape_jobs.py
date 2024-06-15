@@ -6,6 +6,7 @@
 
 import os
 import json
+import csv
 from datetime import date, datetime, timedelta
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -123,11 +124,13 @@ class CompanyJobsFinder():
         """Setter for self.__previous_jobs
         """
 
-        # Create new file on first run for a given company.
-        # Try to rewrite it as Try (open) except (make new file) else (load existing file) finally (file close) after everything else works.
-        if not os.path.exists(self.__company_data_filepath):    # As I understand it, it's a security risk to test a file before opening it because it can create race conditions. That looks like a whole lot of stuff I need to read about later.
-                self.__previous_jobs = {'Titles': [], "date_json_mod": str(datetime.now() - timedelta(days=1)), "update_detected": True}   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
-                self.__first_json_dump = True
+        # Checking for the file like this avoids potentially creating race conditions... something I stumbled upon and now need to go read about.
+        try:
+            with open((self.__company_data_filepath), 'r') as file:
+                pass
+        except FileNotFoundError:
+            self.__previous_jobs = {'Titles': [], "date_json_mod": str(datetime.now() - timedelta(days=1)), "update_detected": True}   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
+            self.__first_json_dump = True
         else:
             with open(self.__company_data_filepath, 'r') as file:
                 self.__previous_jobs = json.load(file)
@@ -195,10 +198,10 @@ class CompanyJobsFinder():
             json.dump(json_formatted_data, file, indent=4, default=str)    # default=str tells the .json file how to handle non-serializable type, such as datetime. Should be okay here since I know exactly what's getting stored every time.
             file.close()
         
-        # The initial creation/writing to the .json has weird recursive effects in Termus (Windows functions as expected). Writing to it twice fixes it...
+        # The initial creation/writing to the .json has weird recursive effects in Termux (Windows functions as expected). Writing to it twice fixes it...
         if self.__first_json_dump == True:
             with open(self.__company_data_filepath, 'w') as file:
-                json.dump(json_formatted_data, file, indent=4, default=str)    # default=str tells the .json file how to handle non-serializable type, such as datetime. Should be okay here since I know exactly what's getting stored every time.
+                json.dump(json_formatted_data, file, indent=4, default=str)
                 file.close()
     
     def send_notification(self, daily_reminder=False):
@@ -227,8 +230,7 @@ class CompanyJobsFinder():
         """Builds the shell script to send the daily notification at the scheduled time.
         """
         with open(self.__notification_script_filepath, 'w') as file:
-            file.write(f'{self.__termux_shebang}\n\n')
-            file.write(f'{self.__notification_command}\n\n')
+            file.write(f'{self.__termux_shebang}\n\n{self.__notification_command}\n\n')
             file.close()
         os.system(f'chmod 755 {self.__notification_script_filepath}')
 
@@ -253,13 +255,14 @@ class LogExecution():
     __start_time = None
     __stop_time = None
     __total_time = None
+    __time_per_company = float()
 
-    def __init__(self, list_of_companies):
-        self.__number_of_companies = len(list_of_companies)
-        self.__build_cd()
+    def __init__(self, number_of_companies):
+        self.__number_of_companies = number_of_companies
+        self.__build__log_filepath()
         self.__log_timestamp(start=True)
 
-    def __build_cd(self):   # This could've technically been inherited from CompanyJobsFinder or vice versa, but the classes don't seem to be in an is-a nor a has-a relationship.
+    def __build__log_filepath(self):   # This could've technically been inherited from CompanyJobsFinder or vice versa, but the classes don't seem to be in an is-a nor a has-a relationship.
         """Build the filepath for the current directory of this program. Note that the forward-slashes are stripped from the end of the filepath.
         """
         cd = os.popen('pwd').read().strip()
@@ -275,16 +278,31 @@ class LogExecution():
             self.__start_time = datetime.now()
         else:
             self.__stop_time = datetime.now()
-    
-    def __calc_total_time(self):
-        self.__total_time = self.__stop_time - self.__start_time
 
     def write_execution_txt(self):
         self.__log_timestamp(start=False)
         self.__calc_total_time()
-        with open(self.__execution_log_filepath, 'a') as file:
-            file.write(f'Start Time: {self.__start_time}, Stop Time: {self.__stop_time}, Total Time: {self.__total_time}, Companies Analyzed: {self.__number_of_companies}, Average Time per Company: {self.__total_time / self.__number_of_companies}\n')
-            file.close()
+        self.__time_per_company = self.__total_time / self.__number_of_companies
+        csv_data = [self.__start_time, self.__stop_time, self.__total_time, self.__number_of_companies, self.__time_per_company]
+        
+        try:
+            with open(self.__execution_log_filepath, 'r', newline='') as file:
+                pass
+        except FileNotFoundError:
+            headers = ['Start Time', 'Stop Time', 'Total Time', 'Companies Analyzed', 'Average Time per Company']
+            with open(self.__execution_log_filepath, 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerows(headers)
+                writer.writerows(csv_data)
+                file.close()
+        else:
+            with open(self.__execution_log_filepath, 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerows(csv_data)
+                file.close()
+
+    def __calc_total_time(self):
+        self.__total_time = self.__stop_time - self.__start_time
 
 def main():
     """
@@ -304,7 +322,7 @@ def main():
     update_detected = False
     
     # Log execution start
-    execution_logger = LogExecution(companies)
+    execution_logger = LogExecution(len(companies))
 
     for company in companies:
         company_object = CompanyJobsFinder(company[0], company[1], company[2], company[3], companies.index(company))

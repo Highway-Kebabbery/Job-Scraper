@@ -1,4 +1,4 @@
-NOTE ABOUT checking ToS and robots.txt to see if they allow scraping.
+NOTE ABOUT checking ToS and robots.txt to see if they allow scraping. NOTE ABOUT HOW ROOTING DEVICE IS NOT REQUIRED.
 
 ## How to Use
 
@@ -17,7 +17,7 @@ NOTE ABOUT checking ToS and robots.txt to see if they allow scraping.
     * As of Android 14, turning off battery optimization removes them from this list, but you should still check here to make sure there's no optimization happening.
 
 
-### Configure FX File Explorer: STORAGE PERMISSIONS?
+### Configure FX File Explorer:
 If you have trouble, you may optionally check out [this guide](https://imgur.com/a/NDkpeaz). The pictures aren't exact, but they're useful.
 1. Open Termux and give it a second to install the bootstrap packages. You can exit the app afterwards.
 2. Open FX File Explorer.
@@ -39,16 +39,16 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
 5. Run: `ls`. You should see the compressed project folder.
 6. Run: `tar -xf <project-folder-name.tar.gz>` to extract the files here.
     * The extracted project folder MUST be in `/data/data/com.termux/files/home/` to run.
-7. Run: `chmod +x ./<project-folder-name>/src/scripts/_setup.sh` to give the setup script execute permissions.
+7. Run: ~~`chmod +x ./<project-folder-name>/src/scripts/_setup.sh`~~ `chmod 755 Job-Scraper-x.x.x` to set permissions.
 8. Run: `./<project-folder-name>/src/scripts/_setup.sh` to configure Termux to run the job scraper.
 9. When setup finishes, COMPLETELY exit Termux. To do so, use the `Exit` option in the Termux persistent notification.
-    * Force quitting the app works, but is not recommended.
+    * Force quitting the app works, but is not recommended.ARRRRRRRRRRRRGHHH THIS STEP MAY BE OBSELETE, ABOUT TO SEE
 
         <img src="./docs/images/termux-exit.jpg" alt="Termux 'Exit' option shown in the persisten notification." width="200"/>
 
-For subsequent executions if the job is stopped:
+For initial and subsequent executions (if the job is stopped):
 
-9. Open Termux and ensure you're in the home directory. Run `./<project-folder-name>/src/scripts/_schedule_scrape_jobs.sh`.
+10. To execute the script open Termux and ensure you're in the home directory. Run `./<project-folder-name>/src/scripts/_schedule_scrape_jobs.sh`.
 
 ******HEYHEYHEY HEY HEY HERE'S A NOTE. LET THEM KNOW ABOUT POTENTIAL SETUP ERROS.
 *****Note: Force-quit the app if it begins entering "y" in an infinite loop. It's happened to me on very rare occasions.
@@ -69,32 +69,34 @@ A big thank you to [luanon404](https://github.com/luanon404/Selenium-On-Termux-A
 
 
 
-
-
-
 Initial test results:
-* ~~Instructions at end of _setup.sh were too crowded. Added newlines and exclamation points to help them stand out.~~
-* ~~_schedule_scrape_jobs.sh wasn't given execute permission. I have a new line `chmod +x _schedule_scrape_jobs.sh` added to hopefully alleviate this. Check for it on next run.~~
-* ~~scrape_jobs.py was not given execute permission, either... weird.~~
-  ~~  * It probably only takes one argument. Test what I have.~~
+~~* Instructions at end of _setup.sh were too crowded. Added newlines and exclamation points to help them stand out.~~
+~~* _schedule_scrape_jobs.sh wasn't given execute permission. I have a new line `chmod +x _schedule_scrape_jobs.sh` added to hopefully alleviate this. Check for it on next run.~~
+~~* scrape_jobs.py was not given execute permission, either... weird.~~
+~~    * It probably only takes one argument. Test what I have.~~
 ~~* The job was scheduled successfully after manually granting execute permission.~~
-* ~~Had to add shebang to top of scrape_jobs.py~~
+~~* Had to add shebang to top of scrape_jobs.py~~
 
 Second try
-* ~~Permissions still failed for both scripts.~~
+~~* Permissions still failed for both scripts.~~
 ~~* Running python script says module bs4 not found for import?~~
-    * ~~Ran _setup.sh again... same result. ModuleNotFoundError: No module named 'bs4'~~
-    * ~~Doesn't see "import BeautifulSoup' either... Must have to do with the setup~~
-        ~~* Added pip install BeautifulSoup to its own line. Testing...~~ That fixed it
+~~    * Ran _setup.sh again... same result. ModuleNotFoundError: No module named 'bs4'~~
+~~    * Doesn't see "import BeautifulSoup' either... Must have to do with the setup~~
+~~        * Added pip install BeautifulSoup to its own line. Testing... That fixed it ISSUE IS BACK!? Issue came from the failure to restart after installing termux-services (failure meaning I didn't do it)~~
 
 Python file isn't creating new file when the file doesn't exist.
 * This is a permissions issue. When I run `python scrape_jobs.py`, it can read and write, but not when it executes like `./Job-Scraper*/src/scrape_jobs.py`.
     * Figure out where, how, and for what to set permissions
-* object of type datetime is not json serializable.
-* Line 298 causes an error when there's no existing file. Should I have it check if a file exists and skip the comparison, or should I make code to construct a json file if it doesn't exist when the loop for
-    each company begins?
+~~* object of type datetime is not json serializable.~~
+~~* Line 298 causes an error when there's no existing file. Should I have it check if a file exists and skip the comparison, or should I make code to construct a json file if it doesn't exist when the loop for each company begins?~~
 
-
+Executing scripts:
+* Changed _setup.sh to run `chmod 755 ./Job-Scraper-*/src/scripts/_schedule_scrape_jobs.sh`, which worked when run manually and allowed me to successfully run `./Job-Scraper-*/src/scripts/_schedule_scrape_jobs.sh` to execute.
+    * Test this on fresh install
+* Concerned because I can only manually call the python script by going to its folder, running `chmod +x scrape_jobs.py` or `chmod 755 scrape_jobs.py`, then `python scrape_jobs.py`.
+    * I need to be able to execute it from `_schedule_scrape_jobs.sh`. My concern is that having to manually start it this way means it won't run when called from `_schedule_scrape_jobs.sh`.
+        * Re-write `_schedule_scrape_jobs.sh` to run the script every minute to test once manual runs of `scrape_jobs.py` are fully successful. This includes getting the daily notification as well as regular job_found notifications.
+DO I NEED TO ASSIGN EXECUTE PERMISSIONS FOR THE TERMUX HOME FOLDER?
 
 
 
@@ -106,3 +108,4 @@ Got to practice building Python classes
 Termux halted all updates on google play. Thanks Peter Mortensen on Stack Exchange. You saved my life.
 Learned how to send a system command from a python script, capture the result, and store it in a variable for later use in the script.
 Learned that os.popen('pwd').read() adds a newline character to the end which gave me a lot of trouble =___=
+somewhere, I need to link to this release version to show that I can outline software testing https://github.com/Highway-Kebabbery/Job-Scraper/releases/tag/v0.4.1
