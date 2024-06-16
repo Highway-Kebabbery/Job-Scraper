@@ -7,6 +7,7 @@
 import os
 import json
 import csv
+from collections import Counter
 from datetime import date, datetime, timedelta
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -60,7 +61,7 @@ class CompanyJobsFinder():
         self.__build_cd()
         self.__no_job_jpg_filepath = f'/{self.__cd}/media/no_job.jpg'
         self.__job_jpg_filepath = f'/{self.__cd}/media/job.jpg'
-        self.__notification_script_filepath = f'/{self.__cd}/scripts/daily_notify_{company_name}_{self.__id_counter}.sh'
+        self.__notification_script_filepath = f'/{self.__cd}/scripts/daily_notify_{company_name}.sh'
     
     def __set_firefox_driver(self, mobile=True):
         """Set up the web driver
@@ -239,6 +240,7 @@ class CompanyJobsFinder():
         """
         current_time = datetime.now()
         notification_time = current_time.replace(hour=10, minute=0, second=0, microsecond=0)
+        #notification_time = datetime.now() + timedelta(minutes=1)    # For quick testing of notification system
 
         if current_time > notification_time:
             notification_time = notification_time + timedelta(days=1)    # Can't go back in time to send a notification.
@@ -313,11 +315,19 @@ def main():
             * In addition, the user is notified when a job listing update is found as well as on every subsequent run of that day to ensure visibility.
         
         To track new companies, simply create and fill out a company attributes list then add that list to the list of companies below.
+        NOTE: No two companies should have the same name in the first position of their attribute list.
     """
     
-    # Company name, careers page url, target tag, target attribute, targeting child of target attribute?
+    # Company name (unique), careers page url, target tag, target attribute, targeting child of target attribute?
     jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', 'styles--3TJHk', True]
     companies = [jagex]
+
+    # Validate that no two companies have the same name.
+    company_names = [company[0] for company in companies]
+    counter = Counter(company_names)
+    duplicate_names = [i for i, j in counter.items() if j > 1]
+    if duplicate_names == True:
+        raise SystemExit
 
     update_detected = False
     
