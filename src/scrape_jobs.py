@@ -381,13 +381,34 @@ def main():
         raise SystemExit
 
     # Begin execution
-    this_execution = ThisExecution(project_version='0.4.1', cronjob=True, mobile=True, fast_notifications=True)
-    execution_logger = LogExecution(len(companies), this_execution.cd, this_execution.project_version, this_execution.cronjob)
+    this_execution = ThisExecution(
+        project_version='0.4.1',
+        cronjob=True,
+        mobile=True,
+        fast_notifications=True
+        )
+    execution_logger = LogExecution(
+        len(companies),
+        this_execution.cd,
+        this_execution.project_version,
+        this_execution.cronjob
+        )
     execution_logger.log_timestamp(start=True)
     update_detected = False
 
     for company in companies:
-        company_object = CompanyJobsFinder(company[0], company[1], company[2], company[3], companies.index(company), this_execution.cd, this_execution.project_version, this_execution.cronjob, this_execution.mobile, this_execution.fast_notifications)
+        company_object = CompanyJobsFinder(
+            company[0],
+            company[1],
+            company[2],
+            company[3],
+            companies.index(company),
+            this_execution.cd,
+            this_execution.project_version,
+            this_execution.cronjob,
+            this_execution.mobile,
+            this_execution.fast_notifications
+            )
         company_object.set_previous_jobs()
         company_object.set_current_jobs_by_class(child=company[4])
 
