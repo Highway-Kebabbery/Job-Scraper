@@ -381,7 +381,7 @@ def main():
         raise SystemExit
 
     # Begin execution
-    this_execution = ThisExecution(version='0.4.1', cronjob=True, mobile=True, fast_notifications=True)
+    this_execution = ThisExecution(project_version='0.4.1', cronjob=True, mobile=True, fast_notifications=True)
     execution_logger = LogExecution(len(companies), this_execution.cd, this_execution.project_version, this_execution.cronjob)
     execution_logger.log_timestamp(start=True)
     update_detected = False
