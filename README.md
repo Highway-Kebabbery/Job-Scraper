@@ -39,7 +39,7 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
 5. Run: `ls`. You should see the compressed project folder.
 6. Run: `tar -xf <project-folder-name.tar.gz>` to extract the files here.
     * The extracted project folder MUST be in `/data/data/com.termux/files/home/` to run.
-7. Run: ~~`chmod +x ./<project-folder-name>/src/scripts/_setup.sh`~~ `chmod 755 Job-Scraper-x.x.x` to set permissions.
+7. Run: ~~`chmod +x ./<project-folder-name>/src/scripts/_setup.sh`~~ `chmod 700 Job-Scraper-x.x.x` to set permissions.
 8. Run: `./<project-folder-name>/src/scripts/_setup.sh` to configure Termux to run the job scraper.
 9. When setup finishes, COMPLETELY exit Termux. To do so, use the `Exit` option in the Termux persistent notification.
     * Force quitting the app works, but is not recommended.ARRRRRRRRRRRRGHHH THIS STEP MAY BE OBSELETE, ABOUT TO SEE
