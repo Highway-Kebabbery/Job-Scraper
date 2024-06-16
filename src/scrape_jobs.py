@@ -26,7 +26,7 @@ class ThisExecution():
     mobile = bool()
     fast_notifications = bool()
 
-    def __init__(self, project_version, cronjob=True, mobile=True, fast_notifications=False):
+    def __init__(self, project_version=project_version, cronjob=True, mobile=True, fast_notifications=False):
         """_summary_
 
         Args:
