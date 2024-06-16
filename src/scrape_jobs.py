@@ -195,14 +195,24 @@ class CompanyJobsFinder():
 
         json_formatted_data = {'Titles':self.__current_jobs, 'date_json_mod':datetime.now(), 'update_detected':update_detected}
 
-        with open(self.__company_data_filepath, 'w') as file:
-            json.dump(json_formatted_data, file, indent=4, default=str)    # default=str tells the .json file how to handle non-serializable type, such as datetime. Should be okay here since I know exactly what's getting stored every time.
-            file.close()
-        
-        # The initial creation/writing to the .json has weird recursive effects in Termux (Windows functions as expected). Writing to it twice fixes it...
-        if self.__first_json_dump == True:
+        # open(<path>, 'w') sohuld make the file if it doesn't exist, but I'm getting a failure in the background when scheduling with cron.
+        try:
+            with open(self.__company_data_filepath, 'r') as file:
+                pass
+        except FileNotFoundError:
+            #os.system(f'touch {self.__company_data_filepath}')
+            
             with open(self.__company_data_filepath, 'w') as file:
                 json.dump(json_formatted_data, file, indent=4, default=str)
+                file.close()
+
+            # The initial creation/writing to the .json has weird recursive effects in Termux (Windows functions as expected). Writing to it twice fixes it...
+            with open(self.__company_data_filepath, 'w') as file:
+                json.dump(json_formatted_data, file, indent=4, default=str)
+                file.close()
+        else:
+            with open(self.__company_data_filepath, 'w') as file:
+                json.dump(json_formatted_data, file, indent=4, default=str)    # default=str tells the .json file how to handle non-serializable type, such as datetime. Should be okay here since I know exactly what's getting stored every time.
                 file.close()
     
     def send_notification(self, daily_reminder=False):
