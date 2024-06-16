@@ -109,3 +109,4 @@ Termux halted all updates on google play. Thanks Peter Mortensen on Stack Exchan
 Learned how to send a system command from a python script, capture the result, and store it in a variable for later use in the script.
 Learned that os.popen('pwd').read() adds a newline character to the end which gave me a lot of trouble =___=
 somewhere, I need to link to this release version to show that I can outline software testing https://github.com/Highway-Kebabbery/Job-Scraper/releases/tag/v0.4.1
+writing to external file for troubleshooting when process runs (fails) in background

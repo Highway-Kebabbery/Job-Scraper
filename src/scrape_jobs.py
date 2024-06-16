@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-"""Loads a company's provided careers page and uses the provided tag and attribute identifier to scrape job listings.
+"""
+    Loads a company's provided careers page and uses the provided tag and attribute identifier to scrape job listings.
     Careers are compared against the last scrape to determine if a change occurred and a notification is sent to the host's phone.
 """
 
@@ -16,6 +17,42 @@ from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+class ThisExecution():
+    """This class contains general data about the execution to be passed to other classes.
+    """
+    project_version = ''
+    cd = ''
+    cronjob = bool()
+    mobile = bool()
+    fast_notifications = bool()
+
+    def __init__(self, project_version, cronjob=True, mobile=True, fast_notifications=False):
+        """_summary_
+
+        Args:
+            project_version (string): Release version. Used to build exact filepaths.
+            cronjob (bool, optional): Used in other classes to decide how to set filepaths, as cronjob returns a different "cd" than a manual execution. Defaults to True.
+            mobile (bool, optional): Used to decide how to find the location of geckodriver, as this differs from Termux (mobile) to Windows. Defaults to True.
+            fast_notifications (bool, optional): Used to send daily notifications one minute after generation for quick testing. Defaults to False.
+        """
+        self.project_version = project_version
+        self.cronjob = cronjob
+        self.mobile = mobile
+        self.fast_notifications = fast_notifications
+        self.__build_cd()
+
+    def __build_cd(self):
+        """
+            Build the filepath for the current directory of this program. Note that the forward-slashes are stripped from the end of the filepath.
+            This is necessary because "cd"" differs depending on whether execution is manual or performed by a cronjob.
+        """
+        cd = os.popen('pwd').read().strip()
+        if cd[-1] == "/":
+            cd = cd[:-1]
+        if cd[0] == "/":
+            cd = cd[1:]
+        
+        self.cd = cd
 
 class CompanyJobsFinder():
     """A class for finding and storing job listings available at a company."""
@@ -30,38 +67,49 @@ class CompanyJobsFinder():
     __current_jobs = []
     __previous_jobs = []
 
-    # Sending notifications
+    # Notification content
     __new_jobs_today_msg_title = ''
     __new_jobs_yesterday_msg_title = ''
     __no_jobs_yesterday_msg_title = ''
     __notification_command = ''
     __id_counter = int()    # The index of the company in the list of companies to check. Appends to various objects to give each company a unique number so company actions don't overwrite one another.
+    __fast_notifications = bool()
 
     # filepaths
     __cd = ''
+    __version = ''
     __no_job_jpg_filepath = ''
     __job_jpg_filepath = ''
     __notification_script_filepath = ''
     __termux_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
 
-    # Writing to .json
-    __first_json_dump = bool    # Everything works on Windows without this trickery. In Termux upon initial creation of the .json, the entire contents are recursively dumped into the empty list paired to the first key... it's really weird, it shouldn't happen, and this stupid trick avoids it. I'm mad about it.
-
-    def __init__(self, company_name, url, target_tag, target_attribute_value, id_counter):
-        self.__set_firefox_driver()   # DON'T FORGET to remove the 'mobile=False' argument when you finish testing on Windows =____=
+    def __init__(self, company_name, url, target_tag, target_attribute_value, id_counter, cd, version, cronjob, mobile, fast_notifications):
+        self.__set_firefox_driver(mobile)
         self.__company_name = company_name
         self.__url = url
         self.__target_tag = target_tag
         self.__target_attribute_value = target_attribute_value
-        self.__company_data_filepath = './data/' + str(self.__company_name) + '.json'
         self.__new_jobs_today_msg_title = f'Job listings updated today for {company_name}!'
         self.__new_jobs_yesterday_msg_title = f'Job listings updated yesterday for {company_name}!'
         self.__no_jobs_yesterday_msg_title = f'No new jobs yesterday at {company_name}.'
         self.__id_counter = id_counter
-        self.__build_cd()
-        self.__no_job_jpg_filepath = f'/{self.__cd}/media/no_job.jpg'
-        self.__job_jpg_filepath = f'/{self.__cd}/media/job.jpg'
-        self.__notification_script_filepath = f'/{self.__cd}/scripts/daily_notify_{company_name}.sh'
+        self.__version = version
+        self.__cd = cd
+        self.__fast_notifications = fast_notifications
+
+        # Build file paths
+        # On manual executions, even from the Termux home folder, "cd" is built relative to the Python script.
+        # cronjobs build "cd" as the Termux home folder, so paths are not relative to the Python script for cronjobs.
+        if cronjob == True:
+            self.__company_data_filepath = f'./{self.__cd}/Job-Scraper-{self.__version}/src/data/{str(self.__company_name)}.json'
+            self.__no_job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__version}/src/media/no_job.jpg'
+            self.__job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__version}/src/media/job.jpg'
+            self.__notification_script_filepath = f'/{self.__cd}/Job-Scraper-{self.__version}/src/scripts/daily_notify_{company_name}.sh'
+        else:
+            self.__company_data_filepath = f'./data/{str(self.__company_name)}.json'
+            self.__no_job_jpg_filepath = f'/{self.__cd}/media/no_job.jpg'
+            self.__job_jpg_filepath = f'/{self.__cd}/media/job.jpg'
+            self.__notification_script_filepath = f'/{self.__cd}/scripts/daily_notify_{company_name}.sh'
     
     def __set_firefox_driver(self, mobile=True):
         """Set up the web driver
@@ -71,7 +119,6 @@ class CompanyJobsFinder():
             because the script is run through Termux on Android, which provides a Linux-based environment. When troubleshooting
             on Win64, don't forget to add the <mobile=False> argument when called in __init__. Defaults to True.
         """
-
         if mobile == False:
             # driver is in environment variables on Android and needs not be called.
             gecko_driver_path = './drivers/win64/geckodriver.exe'
@@ -82,17 +129,6 @@ class CompanyJobsFinder():
             self.__driver = webdriver.Firefox(options=options)
         else:
             self.__driver = webdriver.Firefox(service=service, options=options)
-
-    def __build_cd(self):
-        """Build the filepath for the current directory of this program. Note that the forward-slashes are stripped from the end of the filepath.
-        """
-        cd = os.popen('pwd').read().strip()
-        if cd[-1] == "/":
-            cd = cd[:-1]
-        if cd[0] == "/":
-            cd = cd[1:]
-        
-        self.__cd = cd
 
     @property
     def company_name(self):
@@ -131,7 +167,6 @@ class CompanyJobsFinder():
                 pass
         except FileNotFoundError:
             self.__previous_jobs = {'Titles': [], "date_json_mod": str(datetime.now() - timedelta(days=1)), "update_detected": True}   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
-            self.__first_json_dump = True
         else:
             with open(self.__company_data_filepath, 'r') as file:
                 self.__previous_jobs = json.load(file)
@@ -195,13 +230,10 @@ class CompanyJobsFinder():
 
         json_formatted_data = {'Titles':self.__current_jobs, 'date_json_mod':datetime.now(), 'update_detected':update_detected}
 
-        # open(<path>, 'w') sohuld make the file if it doesn't exist, but I'm getting a failure in the background when scheduling with cron.
         try:
             with open(self.__company_data_filepath, 'r') as file:
                 pass
         except FileNotFoundError:
-            #os.system(f'touch {self.__company_data_filepath}')
-            
             with open(self.__company_data_filepath, 'w') as file:
                 json.dump(json_formatted_data, file, indent=4, default=str)
                 file.close()
@@ -248,9 +280,11 @@ class CompanyJobsFinder():
     def __schedule_daily_notification(self):
         """Schedule the daily notification
         """
-        current_time = datetime.now()
-        notification_time = current_time.replace(hour=10, minute=0, second=0, microsecond=0)
-        #notification_time = datetime.now() + timedelta(minutes=1)    # For quick testing of notification system
+        if self.__fast_notifications == False:
+            current_time = datetime.now()
+            notification_time = current_time.replace(hour=10, minute=0, second=0, microsecond=0)
+        else:
+            notification_time = datetime.now() + timedelta(minutes=1)    # For quick testing of notification system
 
         if current_time > notification_time:
             notification_time = notification_time + timedelta(days=1)    # Can't go back in time to send a notification.
@@ -264,38 +298,41 @@ class LogExecution():
     """A class to handle logging the execution of the program.
     """
     __number_of_companies = int()
+    __cd = ''
+    __project_version = ''
+    __cronjob = bool()
     __execution_log_filepath = ''
     __start_time = None
     __stop_time = None
     __total_time = None
     __time_per_company = float()
 
-    def __init__(self, number_of_companies):
+    def __init__(self, number_of_companies, cd, project_version, cronjob):
         self.__number_of_companies = number_of_companies
-        self.__build__log_filepath()
-        self.__log_timestamp(start=True)
+        self.__cd = cd
+        self.__project_version = project_version
+        self.__cronjob = cronjob
 
-    def __build__log_filepath(self):   # This could've technically been inherited from CompanyJobsFinder or vice versa, but the classes don't seem to be in an is-a nor a has-a relationship.
-        """Build the filepath for the current directory of this program. Note that the forward-slashes are stripped from the end of the filepath.
-        """
-        cd = os.popen('pwd').read().strip()
-        if cd[-1] == "/":
-            cd = cd[:-1]
-        if cd[0] == "/":
-            cd = cd[1:]
-        
-        self.__execution_log_filepath = f'/{cd}/../logs/execution_log.txt'
-
-    def __log_timestamp(self, start=bool):
+    def log_timestamp(self, start=bool):
         if start == True:
+            self.__build_execution_log_filepath
             self.__start_time = datetime.now()
         else:
             self.__stop_time = datetime.now()
+            self.__calc_total_time()
+            self.__time_per_company = self.__total_time / self.__number_of_companies
+            self.__write_execution_txt
 
-    def write_execution_txt(self):
-        self.__log_timestamp(start=False)
-        self.__calc_total_time()
-        self.__time_per_company = self.__total_time / self.__number_of_companies
+    def __build_execution_log_filepath(self):
+        if self.__cronjob == True:
+            self.__execution_log_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/logs/execution_log.txt'
+        else:
+            self.__execution_log_filepath = f'/{self.__cd}/../logs/execution_log.txt'
+
+    def __calc_total_time(self):
+        self.__total_time = self.__stop_time - self.__start_time
+
+    def __write_execution_txt(self):
         csv_data = [self.__start_time, self.__stop_time, self.__total_time, self.__number_of_companies, self.__time_per_company]
         
         try:
@@ -314,19 +351,22 @@ class LogExecution():
                 writer.writerow(csv_data)
                 file.close()
 
-    def __calc_total_time(self):
-        self.__total_time = self.__stop_time - self.__start_time
-
 def main():
     """
         main() builds company objects, scrapes current jobs, compares to previous jobs, and reports updates.
             * Users receive one daily update notification:
                 * If an update was found yesterday, the daily notification informs the user.
                 * If no updates were found, the daily notification informs the user of their continued unemployment.
-            * In addition, the user is notified when a job listing update is found as well as on every subsequent run of that day to ensure visibility.
+            * In addition, when a listing update is detected, the user receives a per-execution notification on every subsequent run of the day to ensure visibility.
         
-        To track new companies, simply create and fill out a company attributes list then add that list to the list of companies below.
-        NOTE: No two companies should have the same name in the first position of their attribute list.
+        How to use:
+        * To track new companies, simply create and fill out a company attributes list then add that list to the list of companies below.
+        * No two companies should have the same name in the first position of their attribute list.
+        * Instantiating this_execution:
+            * Always make sure the version number matches the relase number you're using.
+            * Set mobile=False when testing only the job scraping functionality on a Windows system.
+            * Set cronjob=False when manually executing from any command line (Windows or Termux).
+            * Set fast_notifications=True when notifications are needed quickly for testing.
     """
     
     # Company name (unique), careers page url, target tag, target attribute, targeting child of target attribute?
@@ -340,13 +380,14 @@ def main():
     if duplicate_names == True:
         raise SystemExit
 
+    # Begin execution
+    this_execution = ThisExecution(version='0.4.1', cronjob=True, mobile=True, fast_notifications=True)
+    execution_logger = LogExecution(len(companies), this_execution.cd, this_execution.project_version, this_execution.cronjob)
+    execution_logger.log_timestamp(start=True)
     update_detected = False
-    
-    # Log execution start
-    execution_logger = LogExecution(len(companies))
 
     for company in companies:
-        company_object = CompanyJobsFinder(company[0], company[1], company[2], company[3], companies.index(company))
+        company_object = CompanyJobsFinder(company[0], company[1], company[2], company[3], companies.index(company), this_execution.cd, this_execution.project_version, this_execution.cronjob, this_execution.mobile, this_execution.fast_notifications)
         company_object.set_previous_jobs()
         company_object.set_current_jobs_by_class(child=company[4])
 
@@ -368,7 +409,7 @@ def main():
                 company_object.send_notification()  # Index number is appended to --id attribute in termux-notification which generates a unique notification id per company so notifications don't overwrite each other.
 
     # Log execution finish
-    execution_logger.write_execution_txt()
+    execution_logger.log_timestamp(start=False)
 
 if __name__ == '__main__':
     main()
