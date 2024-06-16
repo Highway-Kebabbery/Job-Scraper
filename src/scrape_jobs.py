@@ -77,13 +77,13 @@ class CompanyJobsFinder():
 
     # filepaths
     __cd = ''
-    __version = ''
+    __project_version = ''
     __no_job_jpg_filepath = ''
     __job_jpg_filepath = ''
     __notification_script_filepath = ''
     __termux_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
 
-    def __init__(self, company_name, url, target_tag, target_attribute_value, id_counter, cd, version, cronjob, mobile, fast_notifications):
+    def __init__(self, company_name, url, target_tag, target_attribute_value, id_counter, cd, project_version, cronjob, mobile, fast_notifications):
         self.__set_firefox_driver(mobile)
         self.__company_name = company_name
         self.__url = url
@@ -93,7 +93,7 @@ class CompanyJobsFinder():
         self.__new_jobs_yesterday_msg_title = f'Job listings updated yesterday for {company_name}!'
         self.__no_jobs_yesterday_msg_title = f'No new jobs yesterday at {company_name}.'
         self.__id_counter = id_counter
-        self.__version = version
+        self.__project_version = project_version
         self.__cd = cd
         self.__fast_notifications = fast_notifications
 
@@ -101,10 +101,10 @@ class CompanyJobsFinder():
         # On manual executions, even from the Termux home folder, "cd" is built relative to the Python script.
         # cronjobs build "cd" as the Termux home folder, so paths are not relative to the Python script for cronjobs.
         if cronjob == True:
-            self.__company_data_filepath = f'/{self.__cd}/Job-Scraper-{self.__version}/src/data/{self.__company_name}.json'
-            self.__no_job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__version}/src/media/no_job.jpg'
-            self.__job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__version}/src/media/job.jpg'
-            self.__notification_script_filepath = f'/{self.__cd}/Job-Scraper-{self.__version}/src/scripts/daily_notify_{company_name}.sh'
+            self.__company_data_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/data/{self.__company_name}.json'
+            self.__no_job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/media/no_job.jpg'
+            self.__job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/media/job.jpg'
+            self.__notification_script_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/scripts/daily_notify_{company_name}.sh'
         else:
             self.__company_data_filepath = f'./data/{self.__company_name}.json'
             self.__no_job_jpg_filepath = f'/{self.__cd}/media/no_job.jpg'
@@ -315,13 +315,13 @@ class LogExecution():
 
     def log_timestamp(self, start=bool):
         if start == True:
-            self.__build_execution_log_filepath
+            self.__build_execution_log_filepath()
             self.__start_time = datetime.now()
         else:
             self.__stop_time = datetime.now()
             self.__calc_total_time()
             self.__time_per_company = self.__total_time / self.__number_of_companies
-            self.__write_execution_txt
+            self.__write_execution_txt()
 
     def __build_execution_log_filepath(self):
         if self.__cronjob == True:
@@ -383,7 +383,7 @@ def main():
     # Begin execution
     this_execution = ThisExecution(
         project_version='0.4.1',
-        cronjob=False,
+        cronjob=True,  # cronjob=True currently works for manual execution. cronjob=False does not. filepath error. Remove all notes about cronjob path being different. It works when following the cronjob=True path. Eliminate all comments and paths noting otherwise.
         mobile=True,
         fast_notifications=True
         )
