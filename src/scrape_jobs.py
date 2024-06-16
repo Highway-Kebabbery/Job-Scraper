@@ -22,21 +22,18 @@ class ThisExecution():
     """
     project_version = ''
     cd = ''
-    cronjob = bool()
     mobile = bool()
     fast_notifications = bool()
 
-    def __init__(self, project_version=project_version, cronjob=True, mobile=True, fast_notifications=False):
+    def __init__(self, project_version=project_version, mobile=True, fast_notifications=False):
         """_summary_
 
         Args:
             project_version (string): Release version. Used to build exact filepaths.
-            cronjob (bool, optional): Used in other classes to decide how to set filepaths, as cronjob returns a different "cd" than a manual execution. Defaults to True.
             mobile (bool, optional): Used to decide how to find the location of geckodriver, as this differs from Termux (mobile) to Windows. Defaults to True.
             fast_notifications (bool, optional): Used to send daily notifications one minute after generation for quick testing. Defaults to False.
         """
         self.project_version = project_version
-        self.cronjob = cronjob
         self.mobile = mobile
         self.fast_notifications = fast_notifications
         self.__build_cd()
@@ -44,7 +41,6 @@ class ThisExecution():
     def __build_cd(self):
         """
             Build the filepath for the current directory of this program. Note that the forward-slashes are stripped from the end of the filepath.
-            This is necessary because "cd"" differs depending on whether execution is manual or performed by a cronjob.
         """
         cd = os.popen('pwd').read().strip()
         if cd[-1] == "/":
@@ -83,7 +79,7 @@ class CompanyJobsFinder():
     __notification_script_filepath = ''
     __termux_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
 
-    def __init__(self, company_name, url, target_tag, target_attribute_value, id_counter, cd, project_version, cronjob, mobile, fast_notifications):
+    def __init__(self, company_name, url, target_tag, target_attribute_value, id_counter, cd, project_version, mobile, fast_notifications):
         self.__set_firefox_driver(mobile)
         self.__company_name = company_name
         self.__url = url
@@ -98,18 +94,10 @@ class CompanyJobsFinder():
         self.__fast_notifications = fast_notifications
 
         # Build file paths
-        # On manual executions, even from the Termux home folder, "cd" is built relative to the Python script.
-        # cronjobs build "cd" as the Termux home folder, so paths are not relative to the Python script for cronjobs.
-        if cronjob == True:
-            self.__company_data_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/data/{self.__company_name}.json'
-            self.__no_job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/media/no_job.jpg'
-            self.__job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/media/job.jpg'
-            self.__notification_script_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/scripts/daily_notify_{company_name}.sh'
-        else:
-            self.__company_data_filepath = f'./data/{self.__company_name}.json'
-            self.__no_job_jpg_filepath = f'/{self.__cd}/media/no_job.jpg'
-            self.__job_jpg_filepath = f'/{self.__cd}/media/job.jpg'
-            self.__notification_script_filepath = f'/{self.__cd}/scripts/daily_notify_{company_name}.sh'
+        self.__company_data_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/data/{self.__company_name}.json'
+        self.__no_job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/media/no_job.jpg'
+        self.__job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/media/job.jpg'
+        self.__notification_script_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/scripts/daily_notify_{company_name}.sh'
     
     def __set_firefox_driver(self, mobile=True):
         """Set up the web driver
@@ -300,18 +288,16 @@ class LogExecution():
     __number_of_companies = int()
     __cd = ''
     __project_version = ''
-    __cronjob = bool()
     __execution_log_filepath = ''
     __start_time = None
     __stop_time = None
     __total_time = None
     __time_per_company = float()
 
-    def __init__(self, number_of_companies, cd, project_version, cronjob):
+    def __init__(self, number_of_companies, cd, project_version):
         self.__number_of_companies = number_of_companies
         self.__cd = cd
         self.__project_version = project_version
-        self.__cronjob = cronjob
 
     def log_timestamp(self, start=bool):
         if start == True:
@@ -324,10 +310,7 @@ class LogExecution():
             self.__write_execution_txt()
 
     def __build_execution_log_filepath(self):
-        if self.__cronjob == True:
-            self.__execution_log_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/logs/execution_log.txt'
-        else:
-            self.__execution_log_filepath = f'/{self.__cd}/../logs/execution_log.txt'
+        self.__execution_log_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/logs/execution_log.txt'
 
     def __calc_total_time(self):
         self.__total_time = self.__stop_time - self.__start_time
@@ -365,7 +348,6 @@ def main():
         * Instantiating this_execution:
             * Always make sure the version number matches the relase number you're using.
             * Set mobile=False when testing only the job scraping functionality on a Windows system.
-            * Set cronjob=False when manually executing from any command line (Windows or Termux).
             * Set fast_notifications=True when notifications are needed quickly for testing.
     """
     
@@ -383,15 +365,13 @@ def main():
     # Begin execution
     this_execution = ThisExecution(
         project_version='0.4.1',
-        cronjob=True,  # cronjob=True currently works for manual execution. cronjob=False does not. filepath error. Remove all notes about cronjob path being different. It works when following the cronjob=True path. Eliminate all comments and paths noting otherwise.
         mobile=True,
         fast_notifications=True
         )
     execution_logger = LogExecution(
         len(companies),
         this_execution.cd,
-        this_execution.project_version,
-        this_execution.cronjob
+        this_execution.project_version
         )
     execution_logger.log_timestamp(start=True)
     update_detected = False
@@ -405,7 +385,6 @@ def main():
             companies.index(company),
             this_execution.cd,
             this_execution.project_version,
-            this_execution.cronjob,
             this_execution.mobile,
             this_execution.fast_notifications
             )
@@ -438,21 +417,11 @@ if __name__ == '__main__':
 
 # Still need to set daily messages to schedule a time
 """
-    Notes for what I'll call the final project:
-
-    * Running `python scrape_jobs.py` gives the script permission to read/write the files I need (./data/<company>.json), but running `chmod +x ./path/to/scape_jobs.py` then `./path/to/scrape_jobs.py` does not give it the permission to do this.
-    * completely delete termux and all dependencies to begin testing the configuration script
-    
-    * Create a test unit for the entire scraper that runs on Windows to work out scraping the company of your choice before automating it.
-    * When that's all done, write the README.md file
-    * "Get a job you ******* slob's how he replied" (but realaly, celebrate your accomplishment)
-
     Notes for future work:
     * What happens if they remove all listings and there's nothing to return? I... don't know how to test and account for that until after a company I targeted removes all listings.
     * Program currently only checks whether the listings changed. This will register removals as well as new listings. Find a way to notate new listings.
-    * I can probably do something like check to see if each current job is in the past jobs, and if each past job is in the current jobs.
+        * I can probably do something like check to see if each current job is in the past jobs, and if each past job is in the current jobs.
         * If current job not in pastlistings, BOOM new listing, and I have its name and can store in a variable for use. If past job not in current listings... who cares. Maybe don't check for that after all.
     * I don't filter for keywords. This is fine for now as I'm targeting smaller companies with fewer listing updates, but for larger companies I'd want to filter new jobs by keyword.
-    * I also only check for updates. I could feasibly use this class to simply check for jobs with certain keywords. For example: scrape company with many listings for jobs, then monitor over time for changes.
     * I'm going to need to handle instances where there are multiple pages of jobs. Another issue for when I target larger companies. Selenium should make it easy to handle.
 """

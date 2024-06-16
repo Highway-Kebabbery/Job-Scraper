@@ -39,7 +39,7 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
 5. Run: `ls`. You should see the compressed project folder.
 6. Run: `tar -xf <project-folder-name.tar.gz>` to extract the files here.
     * The extracted project folder MUST be in `/data/data/com.termux/files/home/` to run.
-7. Run: ~~`chmod +x ./<project-folder-name>/src/scripts/_setup.sh`~~ `chmod 700 Job-Scraper-x.x.x` to set permissions.
+7. Run: `chmod 700 Job-Scraper-x.x.x` to set permissions.
 8. Run: `./<project-folder-name>/src/scripts/_setup.sh` to configure Termux to run the job scraper.
 9. When setup finishes, COMPLETELY exit Termux. To do so, use the `Exit` option in the Termux persistent notification.
     * Force quitting the app works, but is not recommended.ARRRRRRRRRRRRGHHH THIS STEP MAY BE OBSELETE, ABOUT TO SEE
@@ -63,7 +63,7 @@ A big thank you to [luanon404](https://github.com/luanon404/Selenium-On-Termux-A
 
 
 
-
+****Pore through scrape_jobs.py and write down everything I've learned.
 ****In scrape_jobs.py, I need to change all instances of "cd" to "wd"
 
 
@@ -110,3 +110,5 @@ Learned how to send a system command from a python script, capture the result, a
 Learned that os.popen('pwd').read() adds a newline character to the end which gave me a lot of trouble =___=
 somewhere, I need to link to this release version to show that I can outline software testing https://github.com/Highway-Kebabbery/Job-Scraper/releases/tag/v0.4.1
 writing to external file for troubleshooting when process runs (fails) in background
+Learned how to write out to external files through terminal when my program fails in the background
+A lot of shell scripting experience
