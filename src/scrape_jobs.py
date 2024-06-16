@@ -101,12 +101,12 @@ class CompanyJobsFinder():
         # On manual executions, even from the Termux home folder, "cd" is built relative to the Python script.
         # cronjobs build "cd" as the Termux home folder, so paths are not relative to the Python script for cronjobs.
         if cronjob == True:
-            self.__company_data_filepath = f'./{self.__cd}/Job-Scraper-{self.__version}/src/data/{str(self.__company_name)}.json'
+            self.__company_data_filepath = f'/{self.__cd}/Job-Scraper-{self.__version}/src/data/{self.__company_name}.json'
             self.__no_job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__version}/src/media/no_job.jpg'
             self.__job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__version}/src/media/job.jpg'
             self.__notification_script_filepath = f'/{self.__cd}/Job-Scraper-{self.__version}/src/scripts/daily_notify_{company_name}.sh'
         else:
-            self.__company_data_filepath = f'./data/{str(self.__company_name)}.json'
+            self.__company_data_filepath = f'./data/{self.__company_name}.json'
             self.__no_job_jpg_filepath = f'/{self.__cd}/media/no_job.jpg'
             self.__job_jpg_filepath = f'/{self.__cd}/media/job.jpg'
             self.__notification_script_filepath = f'/{self.__cd}/scripts/daily_notify_{company_name}.sh'
@@ -280,8 +280,8 @@ class CompanyJobsFinder():
     def __schedule_daily_notification(self):
         """Schedule the daily notification
         """
+        current_time = datetime.now()
         if self.__fast_notifications == False:
-            current_time = datetime.now()
             notification_time = current_time.replace(hour=10, minute=0, second=0, microsecond=0)
         else:
             notification_time = datetime.now() + timedelta(minutes=1)    # For quick testing of notification system
@@ -383,7 +383,7 @@ def main():
     # Begin execution
     this_execution = ThisExecution(
         project_version='0.4.1',
-        cronjob=True,
+        cronjob=False,
         mobile=True,
         fast_notifications=True
         )

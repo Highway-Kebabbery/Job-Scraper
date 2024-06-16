@@ -64,7 +64,7 @@ A big thank you to [luanon404](https://github.com/luanon404/Selenium-On-Termux-A
 
 
 
-
+****In scrape_jobs.py, I need to change all instances of "cd" to "wd"
 
 
 
