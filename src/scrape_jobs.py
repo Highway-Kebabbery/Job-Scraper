@@ -248,6 +248,7 @@ class CompanyJobsFinder():
         os.system('sv-enable atd')    # enable at daemon
         os.system('sv up atd')    # start at service for one job
         os.system(f'echo "{self.__notification_script_filepath}" | at {notification_time.strftime("%H:%M %m/%d/%Y")}')
+        os.system(f'rm {self.__notification_script_filepath} | at {(notification_time + timedelta(minutes=1)).strftime("%H:%M %m/%d/%Y")}')    # Clean up script after use.
 
 class LogExecution():
     """A class to handle logging the execution of the program.
