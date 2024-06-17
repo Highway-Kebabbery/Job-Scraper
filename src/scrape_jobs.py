@@ -364,7 +364,7 @@ def main():
 
     # Begin execution
     this_execution = ThisExecution(
-        project_version='0.4.2',
+        project_version='0.4.3',
         mobile=True,
         fast_notifications=False
         )
