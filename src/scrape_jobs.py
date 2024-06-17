@@ -21,7 +21,7 @@ class ThisExecution():
     """This class contains general data about the execution to be passed to other classes.
     """
     project_version = ''
-    cd = ''
+    wd = ''
     mobile = bool()
     fast_notifications = bool()
 
@@ -36,19 +36,19 @@ class ThisExecution():
         self.project_version = project_version
         self.mobile = mobile
         self.fast_notifications = fast_notifications
-        self.__build_cd()
+        self.__build_wd()
 
-    def __build_cd(self):
+    def __build_wd(self):
         """
             Build the filepath for the current directory of this program. Note that the forward-slashes are stripped from the end of the filepath.
         """
-        cd = os.popen('pwd').read().strip()
-        if cd[-1] == "/":
-            cd = cd[:-1]
-        if cd[0] == "/":
-            cd = cd[1:]
+        wd = os.popen('pwd').read().strip()
+        if wd[-1] == "/":
+            wd = wd[:-1]
+        if wd[0] == "/":
+            wd = wd[1:]
         
-        self.cd = cd
+        self.wd = wd
 
 class CompanyJobsFinder():
     """A class for finding and storing job listings available at a company."""
@@ -72,14 +72,14 @@ class CompanyJobsFinder():
     __fast_notifications = bool()
 
     # filepaths
-    __cd = ''
+    __wd = ''
     __project_version = ''
     __no_job_jpg_filepath = ''
     __job_jpg_filepath = ''
     __notification_script_filepath = ''
     __termux_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
 
-    def __init__(self, company_name, url, target_tag, target_attribute_value, id_counter, cd, project_version, mobile, fast_notifications):
+    def __init__(self, company_name, url, target_tag, target_attribute_value, id_counter, wd, project_version, mobile, fast_notifications):
         self.__set_firefox_driver(mobile)
         self.__company_name = company_name
         self.__url = url
@@ -90,14 +90,14 @@ class CompanyJobsFinder():
         self.__no_jobs_yesterday_msg_title = f'No new jobs yesterday at {company_name}.'
         self.__id_counter = id_counter
         self.__project_version = project_version
-        self.__cd = cd
+        self.__wd = wd
         self.__fast_notifications = fast_notifications
 
         # Build file paths
-        self.__company_data_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/data/{self.__company_name}.json'
-        self.__no_job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/media/no_job.jpg'
-        self.__job_jpg_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/media/job.jpg'
-        self.__notification_script_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/src/scripts/daily_notify_{company_name}.sh'
+        self.__company_data_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/data/{self.__company_name}.json'
+        self.__no_job_jpg_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/media/no_job.jpg'
+        self.__job_jpg_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/media/job.jpg'
+        self.__notification_script_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/scripts/daily_notify_{company_name}.sh'
     
     def __set_firefox_driver(self, mobile=True):
         """Set up the web driver
@@ -286,7 +286,7 @@ class LogExecution():
     """A class to handle logging the execution of the program.
     """
     __number_of_companies = int()
-    __cd = ''
+    __wd = ''
     __project_version = ''
     __execution_log_filepath = ''
     __start_time = None
@@ -294,9 +294,9 @@ class LogExecution():
     __total_time = None
     __time_per_company = float()
 
-    def __init__(self, number_of_companies, cd, project_version):
+    def __init__(self, number_of_companies, wd, project_version):
         self.__number_of_companies = number_of_companies
-        self.__cd = cd
+        self.__wd = wd
         self.__project_version = project_version
 
     def log_timestamp(self, start=bool):
@@ -310,7 +310,7 @@ class LogExecution():
             self.__write_execution_txt()
 
     def __build_execution_log_filepath(self):
-        self.__execution_log_filepath = f'/{self.__cd}/Job-Scraper-{self.__project_version}/logs/execution_log.txt'
+        self.__execution_log_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/logs/execution_log.txt'
 
     def __calc_total_time(self):
         self.__total_time = self.__stop_time - self.__start_time
@@ -370,7 +370,7 @@ def main():
         )
     execution_logger = LogExecution(
         len(companies),
-        this_execution.cd,
+        this_execution.wd,
         this_execution.project_version
         )
     execution_logger.log_timestamp(start=True)
@@ -383,7 +383,7 @@ def main():
             company[2],
             company[3],
             companies.index(company),
-            this_execution.cd,
+            this_execution.wd,
             this_execution.project_version,
             this_execution.mobile,
             this_execution.fast_notifications

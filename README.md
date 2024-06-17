@@ -134,7 +134,10 @@ I created this application for two reasons.
 
 
 
-
+MAIN WORK OUTSTANDING:
+* Continue testing background functionality of cronjob
+* Fix -setup.sh so that it always functions completely and perfectly. Wth is wrong with it?
+* Finish README
 
 
 
@@ -146,7 +149,6 @@ NOTE ABOUT checking ToS and robots.txt to see if they allow scraping. NOTE ABOUT
 Note about having mirror groups for NA, SA, and Europe. Recommend reordering them based on location.
 ***Will need to add screen recording of the app working when it's all running in the final implementation.
 ****Pore through scrape_jobs.py and write down everything I've learned.
-****In scrape_jobs.py, I need to change all instances of "cd" to "wd"
 ****Do I want to add version to _schedule\*.sh to get an exact filepath? Search all scripts and readme for notes about using right version as this would eliminate that issue.
 ****Figure out how to add validation for project version... which I guess would remove the need to set it manually. That's best case scenario.
 ****Changed `_schedule_scrape_jobs.sh` to `Schedule_Job_Scraper.sh` and moved it to the parent deirectory because that's what actually runs the program... Look for mentions of old filepath.
