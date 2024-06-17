@@ -68,7 +68,6 @@ class CompanyJobsFinder():
     __new_jobs_yesterday_msg_title = ''
     __no_jobs_yesterday_msg_title = ''
     __notification_command = ''
-    __id_counter = int()    # The index of the company in the list of companies to check. Appends to various objects to give each company a unique number so company actions don't overwrite one another.
     __fast_notifications = bool()
 
     # filepaths
@@ -79,7 +78,7 @@ class CompanyJobsFinder():
     __notification_script_filepath = ''
     __termux_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
 
-    def __init__(self, company_name, url, target_tag, target_attribute_value, id_counter, wd, project_version, mobile, fast_notifications):
+    def __init__(self, company_name, url, target_tag, target_attribute_value, wd, project_version, mobile, fast_notifications):
         self.__set_firefox_driver(mobile)
         self.__company_name = company_name
         self.__url = url
@@ -88,7 +87,6 @@ class CompanyJobsFinder():
         self.__new_jobs_today_msg_title = f'Job listings updated today for {company_name}!'
         self.__new_jobs_yesterday_msg_title = f'Job listings updated yesterday for {company_name}!'
         self.__no_jobs_yesterday_msg_title = f'No new jobs yesterday at {company_name}.'
-        self.__id_counter = id_counter
         self.__project_version = project_version
         self.__wd = wd
         self.__fast_notifications = fast_notifications
@@ -244,11 +242,11 @@ class CompanyJobsFinder():
         # Choose content of the notification
         if daily_reminder == True:
             if self.__previous_jobs['update_detected'] == False:    # Most likely message to occur
-                self.__notification_command = f'termux-notification --title "{self.__no_jobs_yesterday_msg_title}" --content "Keep eating ramen noodles." --id big_unemployed-daily-{self.__id_counter} --image-path {self.__no_job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_unemployed-daily-{self.__id_counter}" '
+                self.__notification_command = f'termux-notification --title "{self.__no_jobs_yesterday_msg_title}" --content "Keep eating ramen noodles." --id big_unemployed-daily-{self.__company_name} --image-path {self.__no_job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_unemployed-daily-{self.__company_name}" '
             else:
-                self.__notification_command = f'termux-notification --title "{self.__new_jobs_yesterday_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-daily-{self.__id_counter} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-daily-{self.__id_counter}" '
+                self.__notification_command = f'termux-notification --title "{self.__new_jobs_yesterday_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-daily-{self.__company_name} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-daily-{self.__company_name}" '
         else:
-            self.__notification_command = f'termux-notification --title "{self.__new_jobs_today_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-{self.__id_counter} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-{self.__id_counter}" '
+            self.__notification_command = f'termux-notification --title "{self.__new_jobs_today_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-{self.__company_name} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-{self.__company_name}" '
         
         # Send the notification
         if daily_reminder == True:
@@ -382,7 +380,6 @@ def main():
             company[1],
             company[2],
             company[3],
-            companies.index(company),
             this_execution.wd,
             this_execution.project_version,
             this_execution.mobile,

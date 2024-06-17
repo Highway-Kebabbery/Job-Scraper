@@ -71,6 +71,7 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
 3. Open Termux.
 4. Ensure you are in `/data/data/com.termux/files/home/`.
 5. Run: `ls`. You should see the compressed project folder.
+    * Note: You should only have one version of the project downloaded at any given time. Remove old versions before upgrading.
 6. Run: `tar -xf Job-Scraper-<version number>.tar.gz` to extract the files here.
     * The extracted project folder MUST be in `/data/data/com.termux/files/home/` to run.
 7. Run: `chmod 700 Job-Scraper-<version number>` to set permissions.
@@ -88,6 +89,7 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
     * To stop the job, run `crontab -r`.
     * The application is designed to treat the first day of scraping a company website as a positive listing update identification, so it will send a notification on each subsequent execution that day.
 2. Adding companies to track:
+    * Check robots.txt before scraping a website and respect the owner's preferences.
     * $$$$$$$$$$$$$$$$$$$$$$$$$$$
 3. Changing execution frequency:
     * $$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -143,15 +145,13 @@ MAIN WORK OUTSTANDING:
 
 
 
-NOTE ABOUT checking ToS and robots.txt to see if they allow scraping. NOTE ABOUT HOW ROOTING DEVICE IS NOT REQUIRED.
 ******HEYHEYHEY HEY HEY HERE'S A NOTE. LET THEM KNOW ABOUT POTENTIAL SETUP ERROS.
 *****Note: Force-quit the app if it begins entering "y" in an infinite loop. It's happened to me on very rare occasions.
 Note about having mirror groups for NA, SA, and Europe. Recommend reordering them based on location.
+
 ***Will need to add screen recording of the app working when it's all running in the final implementation.
+
 ****Pore through scrape_jobs.py and write down everything I've learned.
-****Do I want to add version to _schedule\*.sh to get an exact filepath? Search all scripts and readme for notes about using right version as this would eliminate that issue.
-****Figure out how to add validation for project version... which I guess would remove the need to set it manually. That's best case scenario.
-****Changed `_schedule_scrape_jobs.sh` to `Schedule_Job_Scraper.sh` and moved it to the parent deirectory because that's what actually runs the program... Look for mentions of old filepath.
 ****Remember to get video of daily notification coming in and taking you to job site.
 ****Last two notifications (per-execution and daily) didn't take me to job site? Why no work anymore??
 
@@ -167,3 +167,38 @@ somewhere, I need to link to this release version to show that I can outline sof
 writing to external file for troubleshooting when process runs (fails) in background
 Learned how to write out to external files through terminal when my program fails in the background
 A lot of shell scripting experience
+
+**Termux/Linux:**
+* How to update the Termux source repository/mirrors.
+* How to configure the Termux environment to run Python, Selenium, and Beautiful Soup.* How to set permissions for files and directories.
+* How to make a script executable with a shebang.
+* How to configure the Termux environment to run cronjobs and `at` jobs (as well as how to use these features on Linux).
+* `cron`:
+    * How to run a cronjob
+    * How to push crontab to a file and back for controlled editing
+    * Learned that `cron` runs out of a different directory than when a script is executed manually. Set filepaths accordingly.
+* How to schedule a job with `at`.
+
+**Python:**
+* I finally got a chance to show that I generally know Python; I just haven't had an extensive use for it yet.
+    * I had no need to make Pythonic setters. Any attribute values passed between classes were required in __init__(), so I simply passed them as arguments during instantiation rather than create @property.setter methods. None of them will ever be updated after instantiation.
+    * Learned about docstrings.
+* Practice using Python to send commands out to the command line and receive data back to be stored in a variable.
+* Experience using .json files to store data for use in later executions.
+* Experience writing to .csv files to log execution data.
+* Learned about web scraping:
+    * Learned about robots.txt.
+    * More practice with Selenium.
+    * Learned how to use Beautiful Soup to parse html.
+    
+**Debugging:**
+* Much time spent using Python to write data out to text files to help me debug processes running in the background that I could not see.
+* Practice reducing processes to their most simple form to help identify what is broken.
+    * To be fair, I've spent my entire life and career doing this, but I kind of need prospective software employers to know that I know this...
+
+**General:**
+* Experience with project design.
+    * What tools will I need, and which options are best suited for the job?
+    * What is required to get these tools set up and running for my project? How do I trust that the tools are set up properly?
+    * How do I know whether my script is failing or the dependencies are causing the issue?
+    * How do I organize this process into a coherent set of instructions for new users to follow? What problems can I help them anticipate and avoid?
