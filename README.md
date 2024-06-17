@@ -185,18 +185,20 @@ A lot of shell scripting experience
     * I had no need to make Pythonic setters. Any attribute values passed between classes were required in __init__(), so I simply passed them as arguments during instantiation rather than create @property.setter methods. None of them will ever be updated after instantiation.
         * I only wrote getters, setters, and deleters when I needed them.
     * Learned about docstrings.
-* Practice using Python to send commands out to the command line and receive data back to be stored in a variable.
+* Practice using Python to send commands out to the command line, and sometimes to receive data back to be stored in a variable.
 * Experience using .json files to store data for use in later executions.
 * Experience writing to .csv files to log execution data.
 * Learned about web scraping:
     * Learned about robots.txt.
     * More practice with Selenium.
     * Learned how to use Beautiful Soup to parse html.
+* Practice using Python to build, store, and clean up temporary shell scripts for use outside the main program.
     
 **Debugging:**
 * Much time spent using Python to write data out to text files to help me debug processes running in the background that I could not see.
 * Practice reducing processes to their most simple form to help identify what is broken.
     * To be fair, I've spent my entire life and career doing this, but I kind of need prospective software employers to know that I know this...
+* Practice solving issues that simply shouldn't happen. Writing to the .json file functioned properly on Windows, but when run from Termux it always jammed the entire contents of the .json file back into the first value of itself. Writing to the file a second time fixed it, so I programmed initial .json creation to write the file twice.
 
 **General:**
 * Experience with project design.

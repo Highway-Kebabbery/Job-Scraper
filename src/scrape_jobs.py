@@ -11,6 +11,7 @@
         
     How to use:
     * To track new companies:
+        * Check the company's robots.txt and respect their wishes.
         * Comment out the main() entry point and use uncomment the desktop_scraper() entry point.
         * Use desktop_scraper() to identify the requisite attributes for company listing job titles
         * In main(), create and fill out a company attributes list and add that list to the list of companies below.
@@ -70,7 +71,7 @@ class CompanyJobsFinder():
     """A class for finding and storing job listings available at a company."""
 
     # Scraping and job comparison
-    __gecko_driver_path = './drivers/win64/geckodriver.exe'
+    __gecko_driver_path = ''
     __driver = None
     __company_name = ''
     __url = ''
@@ -109,6 +110,7 @@ class CompanyJobsFinder():
         self.__fast_notifications = fast_notifications
 
         # Build file paths
+        self.__gecko_driver_path = f'/{self.__wd}/src/drivers/win64/geckodriver.exe'
         self.__company_data_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/data/{self.__company_name}.json'
         self.__no_job_jpg_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/media/no_job.jpg'
         self.__job_jpg_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/media/job.jpg'
@@ -271,7 +273,7 @@ class CompanyJobsFinder():
         os.system('sv-enable atd')    # enable at daemon
         os.system('sv up atd')    # start at service for one job
         os.system(f'echo "{self.__notification_script_filepath}" | at {notification_time.strftime("%H:%M %m/%d/%Y")}')
-        os.system(f'echo "rm {self.__notification_script_filepath}" | at {(notification_time + timedelta(minutes=1)).strftime("%H:%M %m/%d/%Y")}')    # Clean up script after use.
+        os.system(f'echo "rm {self.__notification_script_filepath}" | at {(notification_time + timedelta(minutes=1)).strftime("%H:%M %m/%d/%Y")}')    # Clean up script after use
 
 class LogExecution():
     """A class to handle logging the execution of the program.
@@ -301,7 +303,7 @@ class LogExecution():
             self.__write_execution_txt()
 
     def __build_execution_log_filepath(self):
-        self.__execution_log_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/logs/execution_log.txt'
+        self.__execution_log_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/logs/execution_log.csv'
 
     def __calc_total_time(self):
         self.__total_time = self.__stop_time - self.__start_time
@@ -389,19 +391,55 @@ def main():
     execution_logger.log_timestamp(start=False)
 
 def desktop_scraper():
-    pass
+    """
+        This function acts as a truncated version of main() for use on a desktop. The it returns company job listing titles to the command line.
+        Its purpose is to easily troubleshoot the webscraping functionality on a desktop (non-mobile) machine rather than trying to handle that task on a phone.
+
+        How to use:
+            * Review the global docstring for all information.
+            * Comment out the main() entry point and uncomment the desktop_scraper() entry point.
+            * Excute the script from the parent project folder, otherwise the path will be built incorrectly.
+            * The script needs to be executed from the terminal; the VS Code debugger won't work.
+            * When testing is complete, follow the global docstring instructions to add the newly ready-to-scrape company to main().
+            * Be sure to uncomment main() and re-comment desktop_scraper() when finished.
+    """
+    # Company name (unique), careers page url, target tag, target attribute, targeting child of target attribute?
+    new_company = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', 'styles--3TJHk', True]
+    companies = [new_company]
+
+    # Begin execution
+    this_execution = ThisExecution(
+        project_version='0.4.3',
+        mobile=False
+        )
+
+    for company in companies:
+        company_object = CompanyJobsFinder(
+            company[0],
+            company[1],
+            company[2],
+            company[3],
+            this_execution.wd,
+            this_execution.project_version,
+            this_execution.mobile,
+            this_execution.fast_notifications
+            )
+
+        company_object.set_current_jobs_by_class(child=company[4])
+        print(company_object.current_jobs)       
 
 if __name__ == '__main__':
     main()
     #desktop_scraper()
 
-
 """
-    Notes for future work:
-    * What happens if they remove all listings and there's nothing to return? I... don't know how to test and account for that until after a company I targeted removes all listings.
-    * Program currently only checks whether the listings changed. This will register removals as well as new listings. Find a way to notate new listings.
-        * I can probably do something like check to see if each current job is in the past jobs, and if each past job is in the current jobs.
-        * If current job not in pastlistings, BOOM new listing, and I have its name and can store in a variable for use. If past job not in current listings... who cares. Maybe don't check for that after all.
-    * I don't filter for keywords. This is fine for now as I'm targeting smaller companies with fewer listing updates, but for larger companies I'd want to filter new jobs by keyword.
-    * I'm going to need to handle instances where there are multiple pages of jobs. Another issue for when I target larger companies. Selenium should make it easy to handle.
+Notes for future work:
+* What happens if they remove all listings and there's nothing to return? It'll fail, but I don't know how to test how to account for that until after a company I successfully targeted removes all listings.
+* The program currently only checks whether the listings changed. This will register removals as well as new listings.
+    * I can check to see if each current job is in the past jobs to detect new listings.
+    * I can filter for keywords to narrow down my results.
+        * The downside is that I'll miss any roles that I'm not specifically looking for, which may potentially include something applicable to me.
+        * The upside is that it would be easier to target large companies with a lot of irrelevant listings.
+* I'm going to need to handle instances where there are multiple pages of jobs.
+    * This can likely be handled with the addition of a CompanyJobsFinder.__navigation() method that accepts unique-to-the-company identifiers and information about page-forward/back buttons.
 """
