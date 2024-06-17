@@ -364,9 +364,9 @@ def main():
 
     # Begin execution
     this_execution = ThisExecution(
-        project_version='0.4.1',
+        project_version='0.4.2',
         mobile=True,
-        fast_notifications=True
+        fast_notifications=False
         )
     execution_logger = LogExecution(
         len(companies),

@@ -64,9 +64,11 @@ A big thank you to [luanon404](https://github.com/luanon404/Selenium-On-Termux-A
 
 
 ****Pore through scrape_jobs.py and write down everything I've learned.
+
 ****In scrape_jobs.py, I need to change all instances of "cd" to "wd"
 
-
+****Do I want to add version to _schedule\*.sh to get an exact filepath? Search all scripts and readme for notes about using right version as this would eliminate that issue.
+****Figure out how to add validation for project version... which I guess would remove the need to set it manually. That's best case scenario.
 
 
 Initial test results:
