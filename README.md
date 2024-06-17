@@ -183,6 +183,7 @@ A lot of shell scripting experience
 **Python:**
 * I finally got a chance to show that I generally know Python; I just haven't had an extensive use for it yet.
     * I had no need to make Pythonic setters. Any attribute values passed between classes were required in __init__(), so I simply passed them as arguments during instantiation rather than create @property.setter methods. None of them will ever be updated after instantiation.
+        * I only wrote getters, setters, and deleters when I needed them.
     * Learned about docstrings.
 * Practice using Python to send commands out to the command line and receive data back to be stored in a variable.
 * Experience using .json files to store data for use in later executions.

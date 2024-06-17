@@ -116,36 +116,17 @@ class CompanyJobsFinder():
             self.__driver = webdriver.Firefox(service=service, options=options)
             
     @property
-    def company_name(self):
-        """Getter for self.__company_name
-
-        Returns:
-            string: company name
-        """
-        return self.__company_name
-    
-    @property
-    def url(self):
-        """Getter for company careers page url.
-
-        Returns:
-            string: url for company careers page.
-        """
-        return self.__url
-
-    @property
     def previous_jobs(self):
         """Getter for self.__previous_jobs
 
         Returns:
-            .json: List of jobs as of the last search.
+            Dict: List of jobs as of the last search, time of last execution, whether an update has been detected today.
         """
         return self.__previous_jobs
 
     def set_previous_jobs(self):
         """Setter for self.__previous_jobs
         """
-
         # Checking for the file like this avoids potentially creating race conditions... something I stumbled upon and now need to go read about.
         try:
             with open((self.__company_data_filepath), 'r') as file:
@@ -162,7 +143,7 @@ class CompanyJobsFinder():
         """Getter for self.__current_jobs
 
         Returns:
-            List: List of job titles currently available at the company.
+            List of strings: List of job titles currently available at the company.
         """
         return self.__current_jobs
     
@@ -176,7 +157,7 @@ class CompanyJobsFinder():
             identifiable tag for the job information. Defaults to False.
 
         Returns:
-            List: List of job titles currently available at the company.
+            List of strings: List of job titles currently available at the company.
         """        
         self.__driver.get(self.__url)
 
@@ -209,7 +190,6 @@ class CompanyJobsFinder():
         """This method saves the current job listings to a .json file for comparison to the old job listings.
 
         Args:
-            company_name (string): Used to generate filename.
             update_detected (bool): Used tomorrow to determine whether jobs were found today.
         """
 
