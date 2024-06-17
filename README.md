@@ -155,6 +155,7 @@ Note about having mirror groups for NA, SA, and Europe. Recommend reordering the
 ****Remember to get video of daily notification coming in and taking you to job site.
 ****Last two notifications (per-execution and daily) didn't take me to job site? Why no work anymore??
 
+DON'T FORGET TO CONFIGURE IT TO RUN ON WINDOWS ONLY FOR TESTING
 
 Learned:
 If there's too much HTML, you can't print all to the console. Save to a file to see it all.

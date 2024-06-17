@@ -54,6 +54,7 @@ class CompanyJobsFinder():
     """A class for finding and storing job listings available at a company."""
 
     # Scraping and job comparison
+    __gecko_driver_path = './drivers/win64/geckodriver.exe'
     __driver = None
     __company_name = ''
     __url = ''
@@ -105,17 +106,15 @@ class CompanyJobsFinder():
             because the script is run through Termux on Android, which provides a Linux-based environment. When troubleshooting
             on Win64, don't forget to add the <mobile=False> argument when called in __init__. Defaults to True.
         """
-        if mobile == False:
-            # driver is in environment variables on Android and needs not be called.
-            gecko_driver_path = './drivers/win64/geckodriver.exe'
-            service = FirefoxService(executable_path=gecko_driver_path)
         options = webdriver.FirefoxOptions()
         options.add_argument("--headless")
         if mobile == True:
+            # driver is in environment variables on Android and needs not be called.
             self.__driver = webdriver.Firefox(options=options)
         else:
+            service = FirefoxService(executable_path=self.__gecko_driver_path)
             self.__driver = webdriver.Firefox(service=service, options=options)
-
+            
     @property
     def company_name(self):
         """Getter for self.__company_name
