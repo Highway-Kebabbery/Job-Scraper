@@ -1,8 +1,44 @@
-NOTE ABOUT checking ToS and robots.txt to see if they allow scraping. NOTE ABOUT HOW ROOTING DEVICE IS NOT REQUIRED.
+# <div align="center">Job Scraper</div>
+
+
+## Description
+This application alerts users to updates on a specified company's (or companies') careers page via notifications on their Android phone. **Note:** This application does **not** require you to root your Android phone.
+
+## Features
+### Current:
+* One daily notification per company is scheduled for 1000 each day with a summary of yesterday's findings.
+* When changes to a given company's careers page are detected, all subsequent executions for that day send a notification to the user's phone to increase visibility.
+* The scraper is periodically scheduled as a cronjob, so the frequency can be easily changed.
+* Note that the application currently only checks for *updates* to company listings, so a listing removal will trigger the "listings updated" notification.
+
+### Planned:
+I am currently only targeting smaller companies with a relatively small number of job listings that fit on one webpage. The following planned features will allow me to target larger companies which may have a vast number of listings that are unrelated to me and spread across multiple pages requiring the use of, *e.g.*, a "Next" button to navigate through.
+* Detect only the addition of new jobs.
+* Filter job listings by specified keywords to narrow the search.
+    * As a result, notifications can contain the actual job titles available for application.
+    * The drawback to this feature is that I may miss jobs that I am interested in if I do not use an expansive set of keyword filters.
+    * The benefit to this feature is that I could target much larger companies.
+* Navigate through careers pages with multiple pages using Selenium.
+    * This will likely require implementation on a per-company basis, much as the scraper currently requires unique information to identify the job listing titles.
+    * This will probably be implemented as its own method in the CompanyJobsFinder class.
+* Possible: I could conceivably condense all available listings at all tracked companies into one text file that is built daily and linked to in the daily notification.
+    * This would be useful if I am tracking so many companies that receiving one notification per company is cumbersome. It would be nice, but it is not the most important feature to work on right now.
 
 ## How to Use
 
-### Download Required Apps and Set Permissions:
+### Software Requirements
+* Android 14
+    * Untested on other versions.
+* Termux App
+    * MUST be downloaded from F-Droid. The Google Play Store version is no longer supported, does not even contain all required packages, and thus will not function.
+* Python 3.11.9
+    * Untested on other versions.
+* Selenium 4.9.1
+    * Other versions untested. This version was specifically recommended, without reason, by the resource I used to get Selenium working.
+    * Thank you to [luanon404](https://github.com/luanon404/Selenium-On-Termux-Android?tab=readme-ov-file) for their help with getting Selenium set up for Termux.
+
+### Initial Setup:
+#### Download Required Apps and Set Permissions:
 1. On your phone, download and install F-Droid  [here](https://f-droid.org/en/).
     * You may be prompted to set permissions to allow the installation of the .apk file.
 2. Install Termux from the F-Droid app ([for reference](https://f-droid.org/en/packages/com.termux/)).
@@ -14,11 +50,10 @@ NOTE ABOUT checking ToS and robots.txt to see if they allow scraping. NOTE ABOUT
 6. Navigate to `Settings > Apps > Termux` and check Termux for battery-related settings and set them to "unrestricted," or otherwise to not be optimized for battery life. Do the same for Termux:API.
 7. Navigate to `Settings > Apps > three-dot menu > Special Access > All files access > FX` and enable access.
 8. In `Settings > Battery`, check `Background usage limits > Never auto sleeping apps` for any Termux related apps.
-    * As of Android 14, turning off battery optimization removes them from this list, but you should still check here to make sure there's no optimization happening.
+    * As of Android 14, turning off battery optimization removes them from this list, but you should still check here to make sure there is no optimization happening.
 
-
-### Configure FX File Explorer:
-If you have trouble, you may optionally check out [this guide](https://imgur.com/a/NDkpeaz). The pictures aren't exact, but they're useful.
+#### Configure FX File Explorer:
+If you have trouble, you may optionally check out [this guide](https://imgur.com/a/NDkpeaz). The pictures are not exact, but they are useful.
 1. Open Termux and give it a second to install the bootstrap packages. You can exit the app afterwards.
 2. Open FX File Explorer.
 3. There may be a warning message at the bottom stating that FX needs access to read/write files etc. in order to function. Select `ENABLE ACCESS`.
@@ -27,80 +62,96 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
 6. Select `USE THIS FOLDER`. Allow FX to access files in Termux.
 7. Return to the FX File Explorer home page. The Termux `home` directory is now available for navigation.
 
-
-### Job Scraper Download and Configuration:
+#### Job Scraper Download and Configuration:
 1. <u>On your Android phone</u>, downlaod the .tar.gz file containing the latest release [here](https://github.com/Highway-Kebabbery/Job-Scraper/releases/).
-2. In FX File Explorer, locate the compressed project file inside `Downloads`. Move the compressed project file to the Termux home directory.
+2. In FX File Explorer, locate the compressed project file inside `Download`. Move the compressed project file to the Termux home directory.
 
     <img src="./docs/images/termux-home-dir.jpg" alt="Demonstration of Termux home folder within FX File Explorer" width="200"/>
 
 3. Open Termux.
 4. Ensure you are in `/data/data/com.termux/files/home/`.
 5. Run: `ls`. You should see the compressed project folder.
-6. Run: `tar -xf <project-folder-name.tar.gz>` to extract the files here.
+6. Run: `tar -xf Job-Scraper-<version number>.tar.gz` to extract the files here.
     * The extracted project folder MUST be in `/data/data/com.termux/files/home/` to run.
-7. Run: `chmod 700 Job-Scraper-x.x.x` to set permissions.
-8. Run: `./<project-folder-name>/src/scripts/_setup.sh` to configure Termux to run the job scraper.
+7. Run: `chmod 700 Job-Scraper-<version number>` to set permissions.
+8. Run: `./Job-Scraper-<version number>/src/scripts/_setup.sh` to configure Termux to run the job scraper.
 9. When setup finishes, COMPLETELY exit Termux. To do so, use the `Exit` option in the Termux persistent notification.
-    * Force quitting the app works, but is not recommended.ARRRRRRRRRRRRGHHH THIS STEP MAY BE OBSELETE, ABOUT TO SEE
 
-        <img src="./docs/images/termux-exit.jpg" alt="Termux 'Exit' option shown in the persisten notification." width="200"/>
+    <img src="./docs/images/termux-exit.jpg" alt="Termux 'Exit' option shown in the persisten notification." width="200"/>
 
-For initial and subsequent executions (if the job is stopped):
+10. Setup is complete once Termux has been completely exited.
 
-10. To execute the script open Termux and ensure you're in the home directory. Run `./<project-folder-name>/src/scripts/_schedule_scrape_jobs.sh`.
+### Operation:
+1. Executing the script:
+    * Open Termux, ensure you are in the home directory, and run `./Job-Scraper-<version number>/Schedule_Job_Scraper.sh`.
+    * To check whether the job was started, run `crontab -l`.
+    * To stop the job, run `crontab -r`.
+    * The application is designed to treat the first day of scraping a company website as a positive listing update identification, so it will send a notification on each subsequent execution that day.
+2. Adding companies to track:
+    * $$$$$$$$$$$$$$$$$$$$$$$$$$$
+3. Changing execution frequency:
+    * $$$$$$$$$$$$$$$$$$$$$$$$$$$
 
+
+## Technology
+* **Python:** I chose Python for several reasons:
+    * It is an appropriate tool for the job when considering both the language and the available libraries (namely, Selenium and Beautiful Soup).
+    * Having experience in these libraries will likely be valuable for me as an employee in the future.
+    * I know it.
+    * **Selenium:** Selenium was required to deal with dynamically loaded webpages. It allows me to wait to collect the html until everything I need has loaded, and it is also a widely used and well-vetted tool for this job.
+    * **Beautiful Soup:** Beautiful Soup is a widely-used library for parsing html. 
+* **Termux:** Termux is an emulated command line providing a Linux environment on an Android phone. I chose to implement this application with Termux because it has tools to execute functions like periodic background execution and scheduling, it does not require rooting the Android device, and, though I did have a lot to learn about using the Linux functions available on Termux, I did not need to learn about native Android development. Furthermore, using Termux allowed me to hsot this application on my phone, which means that I do not need to leave my computer on 24/7 to run such a simple task. It is incredibly convenient.
+    * **`cronie`:** The `cron(ie)` package allows for *periodic* scheduling of tasks. *i.e.* Executing the web scraper every *n* hours.
+    * **`at`:** The `at` package allowed me to easily schedule daily notifications to occur once at 1000, and subsequently to clean up the shell scripts with instructions to send those notifications.
+* **Bash:** Bash shell scripts were used to interact with the command line. I used them automate the setup of the Termux environment upon installation, to set up the cronjob that runs the application, and to store instructions for notifications to be executed after the python script finished executing.
+* **JSON:** .json files were a natural choice for storing the results of each execution for comparison at a later time.
+
+
+## What I Learned
+The most challenging parts of this project were related to the configuration of the emulated Linux environment running on an Android phone.
+
+**Python**:
+* 
+
+**Termux (Linux environment):**
+* 
+
+**Shell:**
+* 
+
+**General:**
+* 
+
+
+## Motivation
+I created this application for two reasons.
+1. I want to be a software engineer and will need a job soon. This application will help me monitor companies that I am interested in for jobs I am qualified to apply to. It also serves as a portfolio piece for said jobs.
+    * "Hello, Highway Kebabbery, we are not the slightest bit concerned that you built a program to stalk our careers page on a three-hourly basis day and night in the hopes of finding employment here. That does not put us off at all. Please come in for your interview."
+2. I used to bot on Runescape. I found it rather enjoyable to tweak the code in the bots I found to try and improve their performance. One simple tactic I employed was to add a randomization fucntion for every mouseclick command so as to avoid their macro detection system. After much success, my confidence ballooned and my meticulous tendencies began to slip. Ultimately, I tested one bot for too long without the click randomization function and my childhood account was banned. I made a very rational and contrite appeal to Jagex four years later, but I was denied. It was very unfair /s. As such, my tertiary life-goal is to infiltrate Jagex by gaining so much experience that I would be impossible to turn down for a job. I am going to make them an offer they cannot refuse. Once I am hired at Jagex, at some indeterminate point in the future, and in a role with write access to their database, then I am going to `UPDATE player_accounts SET banned = 'F' WHERE account_name = 'Akhilleus2'`.
+
+
+
+
+
+
+
+
+
+
+
+
+NOTE ABOUT checking ToS and robots.txt to see if they allow scraping. NOTE ABOUT HOW ROOTING DEVICE IS NOT REQUIRED.
 ******HEYHEYHEY HEY HEY HERE'S A NOTE. LET THEM KNOW ABOUT POTENTIAL SETUP ERROS.
 *****Note: Force-quit the app if it begins entering "y" in an infinite loop. It's happened to me on very rare occasions.
 Note about having mirror groups for NA, SA, and Europe. Recommend reordering them based on location.
-Note in the README about how to add new companies
-Note in README about how to change frequency
-
-A big thank you to [luanon404](https://github.com/luanon404/Selenium-On-Termux-Android?tab=readme-ov-file) for their help with getting Termux set up for Selenium.
-
-***BE SURE TO ADD A NOTE ABOUT ADDING NEW COMPANIES
 ***Will need to add screen recording of the app working when it's all running in the final implementation.
-
-
-
 ****Pore through scrape_jobs.py and write down everything I've learned.
-
 ****In scrape_jobs.py, I need to change all instances of "cd" to "wd"
-
 ****Do I want to add version to _schedule\*.sh to get an exact filepath? Search all scripts and readme for notes about using right version as this would eliminate that issue.
 ****Figure out how to add validation for project version... which I guess would remove the need to set it manually. That's best case scenario.
-
-
-Initial test results:
-~~* Instructions at end of _setup.sh were too crowded. Added newlines and exclamation points to help them stand out.~~
-~~* _schedule_scrape_jobs.sh wasn't given execute permission. I have a new line `chmod +x _schedule_scrape_jobs.sh` added to hopefully alleviate this. Check for it on next run.~~
-~~* scrape_jobs.py was not given execute permission, either... weird.~~
-~~    * It probably only takes one argument. Test what I have.~~
-~~* The job was scheduled successfully after manually granting execute permission.~~
-~~* Had to add shebang to top of scrape_jobs.py~~
-
-Second try
-~~* Permissions still failed for both scripts.~~
-~~* Running python script says module bs4 not found for import?~~
-~~    * Ran _setup.sh again... same result. ModuleNotFoundError: No module named 'bs4'~~
-~~    * Doesn't see "import BeautifulSoup' either... Must have to do with the setup~~
-~~        * Added pip install BeautifulSoup to its own line. Testing... That fixed it ISSUE IS BACK!? Issue came from the failure to restart after installing termux-services (failure meaning I didn't do it)~~
-
-Python file isn't creating new file when the file doesn't exist.
-* This is a permissions issue. When I run `python scrape_jobs.py`, it can read and write, but not when it executes like `./Job-Scraper*/src/scrape_jobs.py`.
-    * Figure out where, how, and for what to set permissions
-~~* object of type datetime is not json serializable.~~
-~~* Line 298 causes an error when there's no existing file. Should I have it check if a file exists and skip the comparison, or should I make code to construct a json file if it doesn't exist when the loop for each company begins?~~
-
-Executing scripts:
-* Changed _setup.sh to run `chmod 755 ./Job-Scraper-*/src/scripts/_schedule_scrape_jobs.sh`, which worked when run manually and allowed me to successfully run `./Job-Scraper-*/src/scripts/_schedule_scrape_jobs.sh` to execute.
-    * Test this on fresh install
-* Concerned because I can only manually call the python script by going to its folder, running `chmod +x scrape_jobs.py` or `chmod 755 scrape_jobs.py`, then `python scrape_jobs.py`.
-    * I need to be able to execute it from `_schedule_scrape_jobs.sh`. My concern is that having to manually start it this way means it won't run when called from `_schedule_scrape_jobs.sh`.
-        * Re-write `_schedule_scrape_jobs.sh` to run the script every minute to test once manual runs of `scrape_jobs.py` are fully successful. This includes getting the daily notification as well as regular job_found notifications.
-DO I NEED TO ASSIGN EXECUTE PERMISSIONS FOR THE TERMUX HOME FOLDER?
-
-
+****Changed `_schedule_scrape_jobs.sh` to `Schedule_Job_Scraper.sh` and moved it to the parent deirectory because that's what actually runs the program... Look for mentions of old filepath.
+****Remember to get video of daily notification coming in and taking you to job site.
+****Last two notifications (per-execution and daily) didn't take me to job site? Why no work anymore??
 
 
 Learned:
