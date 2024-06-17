@@ -1,8 +1,24 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 """
-    Loads a company's provided careers page and uses the provided tag and attribute identifier to scrape job listings.
-    Careers are compared against the last scrape to determine if a change occurred and a notification is sent to the host's phone.
+    main() builds company objects, scrapes current jobs, compares to previous jobs, and reports updates.
+        * Users receive one daily update notification:
+            * If an update was found yesterday, the daily notification informs the user.
+            * If no updates were found, the daily notification informs the user of their continued unemployment.
+        * In addition, when a listing update is detected, the user receives a per-execution notification on every subsequent run of the day to ensure visibility.
+    
+    desktop_scraper() is a stripped down version for use on Windows-64 systems to easily test which attributes work for new commpany sites.
+        
+    How to use:
+    * To track new companies:
+        * Comment out the main() entry point and use uncomment the desktop_scraper() entry point.
+        * Use desktop_scraper() to identify the requisite attributes for company listing job titles
+        * In main(), create and fill out a company attributes list and add that list to the list of companies below.
+    * No two companies should have the same name in the first position of their attribute list.
+    * Instantiating this_execution:
+        * Always make sure the version number matches the release number you're using.
+        * Set mobile=False when testing only the job scraping functionality on a Windows system.
+        * Set fast_notifications=True when notifications are needed quickly for testing.
 """
 
 import os
@@ -132,7 +148,11 @@ class CompanyJobsFinder():
             with open((self.__company_data_filepath), 'r') as file:
                 pass
         except FileNotFoundError:
-            self.__previous_jobs = {'Titles': [], "date_json_mod": str(datetime.now() - timedelta(days=1)), "update_detected": True}   # Setting date to yesterday on file creating creates conditions to send daily notification after day 1.
+            if self.__fast_notifications == False:
+                self.__previous_jobs = {'Titles': [], "date_json_mod": str(datetime.now()), "update_detected": True}
+            else:
+                # For testing the daily notification. Setting the date to yesterday upon file creation creates conditions to prepare the daily notification script immediately.
+                self.__previous_jobs = {'Titles': [], "date_json_mod": str(datetime.now() - timedelta(days=1)), "update_detected": True}
         else:
             with open(self.__company_data_filepath, 'r') as file:
                 self.__previous_jobs = json.load(file)
@@ -143,7 +163,7 @@ class CompanyJobsFinder():
         """Getter for self.__current_jobs
 
         Returns:
-            List of strings: List of job titles currently available at the company.
+            List of strings: List of job titles currently available at the company. This class attribute is converted to a dictionary later, so be aware of its type and contents when you intend to call it.
         """
         return self.__current_jobs
     
@@ -190,27 +210,24 @@ class CompanyJobsFinder():
         """This method saves the current job listings to a .json file for comparison to the old job listings.
 
         Args:
-            update_detected (bool): Used tomorrow to determine whether jobs were found today.
+            update_detected (bool): Used tomorrow to store whether jobs were found today.
         """
-
         json_formatted_data = {'Titles':self.__current_jobs, 'date_json_mod':datetime.now(), 'update_detected':update_detected}
+
+        def write_json():
+            with open(self.__company_data_filepath, 'w') as file:
+                    json.dump(json_formatted_data, file, indent=4, default=str)    # default=str tells the .json file how to handle non-serializable type, such as datetime. Should be okay here since I know exactly what's getting stored every time.
+                    file.close()
 
         try:
             with open(self.__company_data_filepath, 'r') as file:
                 pass
         except FileNotFoundError:
-            with open(self.__company_data_filepath, 'w') as file:
-                json.dump(json_formatted_data, file, indent=4, default=str)
-                file.close()
-
-            # The initial creation/writing to the .json has weird recursive effects in Termux (Windows functions as expected). Writing to it twice fixes it...
-            with open(self.__company_data_filepath, 'w') as file:
-                json.dump(json_formatted_data, file, indent=4, default=str)
-                file.close()
+            # The initial creation/writing to the .json has weird recursive effects in Termux. Writing to it twice fixes it... Windows functions as expected.
+            for i in range(2):
+                write_json()
         else:
-            with open(self.__company_data_filepath, 'w') as file:
-                json.dump(json_formatted_data, file, indent=4, default=str)    # default=str tells the .json file how to handle non-serializable type, such as datetime. Should be okay here since I know exactly what's getting stored every time.
-                file.close()
+            write_json()
     
     def send_notification(self, daily_reminder=False):
         """Build and send notifications about the status of job listings at the company.
@@ -245,14 +262,11 @@ class CompanyJobsFinder():
     def __schedule_daily_notification(self):
         """Schedule the daily notification
         """
-        current_time = datetime.now()
         if self.__fast_notifications == False:
-            notification_time = current_time.replace(hour=10, minute=0, second=0, microsecond=0)
+            notification_time = datetime.now().replace(hour=10, minute=0, second=0, microsecond=0)
         else:
-            notification_time = datetime.now() + timedelta(minutes=1)    # For quick testing of notification system
-
-        if current_time > notification_time:
-            notification_time = notification_time + timedelta(days=1)    # Can't go back in time to send a notification.
+            # __fast_notifications allows for quick testing of daily notifications.
+            notification_time = datetime.now() + timedelta(minutes=1)
 
         os.system('sv-enable atd')    # enable at daemon
         os.system('sv up atd')    # start at service for one job
@@ -312,27 +326,13 @@ class LogExecution():
                 file.close()
 
 def main():
+    """Production version of the program. Intended to run on Android in Termux. See the global docstring for details.
     """
-        main() builds company objects, scrapes current jobs, compares to previous jobs, and reports updates.
-            * Users receive one daily update notification:
-                * If an update was found yesterday, the daily notification informs the user.
-                * If no updates were found, the daily notification informs the user of their continued unemployment.
-            * In addition, when a listing update is detected, the user receives a per-execution notification on every subsequent run of the day to ensure visibility.
-        
-        How to use:
-        * To track new companies, simply create and fill out a company attributes list then add that list to the list of companies below.
-        * No two companies should have the same name in the first position of their attribute list.
-        * Instantiating this_execution:
-            * Always make sure the version number matches the relase number you're using.
-            * Set mobile=False when testing only the job scraping functionality on a Windows system.
-            * Set fast_notifications=True when notifications are needed quickly for testing.
-    """
-    
     # Company name (unique), careers page url, target tag, target attribute, targeting child of target attribute?
     jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', 'styles--3TJHk', True]
     companies = [jagex]
 
-    # Validate that no two companies have the same name.
+    # Validate that no two companies 'n' have the same name in companies[n][0].
     company_names = [company[0] for company in companies]
     counter = Counter(company_names)
     duplicate_names = [i for i, j in counter.items() if j > 1]
@@ -364,9 +364,10 @@ def main():
             this_execution.mobile,
             this_execution.fast_notifications
             )
+        
+        # Compare current jobs to last execution's findings
         company_object.set_previous_jobs()
         company_object.set_current_jobs_by_class(child=company[4])
-
         if company_object.previous_jobs['Titles'] != company_object.current_jobs:
             update_detected = True
             company_object.dump_current_jobs_json(update_detected)
@@ -387,11 +388,14 @@ def main():
     # Log execution finish
     execution_logger.log_timestamp(start=False)
 
+def desktop_scraper():
+    pass
+
 if __name__ == '__main__':
     main()
+    #desktop_scraper()
 
 
-# Still need to set daily messages to schedule a time
 """
     Notes for future work:
     * What happens if they remove all listings and there's nothing to return? I... don't know how to test and account for that until after a company I targeted removes all listings.
