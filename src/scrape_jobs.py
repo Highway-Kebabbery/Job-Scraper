@@ -76,7 +76,7 @@ class CompanyJobsFinder():
     __no_job_jpg_filepath = ''
     __job_jpg_filepath = ''
     __notification_script_filepath = ''
-    __termux_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
+    __bash_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
 
     def __init__(self, company_name, url, target_tag, target_attribute_value, wd, project_version, mobile, fast_notifications):
         self.__set_firefox_driver(mobile)
@@ -259,7 +259,7 @@ class CompanyJobsFinder():
         """Builds the shell script to send the daily notification at the scheduled time.
         """
         with open(self.__notification_script_filepath, 'w') as file:
-            file.write(f'{self.__termux_shebang}\n\n{self.__notification_command}\n\n')
+            file.write(f'{self.__bash_shebang}\n\n{self.__notification_command}\n\n')
             file.close()
         os.system(f'chmod 700 {self.__notification_script_filepath}')
 
