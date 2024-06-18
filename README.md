@@ -36,6 +36,7 @@ MAIN WORK OUTSTANDING:
             * Stop recording.
     * Note about having mirror groups for NA, SA, and Europe? Recommend reordering them based on location?
     * FOR THE LOVE OF GOD, SET THE PROJECT VERSION BEFORE YOU RELEASE IT AGAIN.
+    * Jagex added enough jobs that there's now a "View More" button, so I should try to write the Selenium method to handle these instances while I have a chance.
 *****
 *****
 *****
