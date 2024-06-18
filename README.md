@@ -2,6 +2,46 @@
 
 Note that this application is still undergoing alpha testing to understand the effects of various degrees of background status on the continued periodic function of Termux, `crond`, and `atd`. It is currently unknown whether de-optimizing Termux and Termux:API for battery performance while leaving on the battery optimization of the entire phone will interfere with Termux, `crond`, or `atd` after periods of extended disuse. Recommendations based on the findings will be added to the ["Download Required Apps and Set Permissions"](#download-required-apps-and-set-permissions) section when testing is complete.
 
+Note that the _setup.sh file has not yet been perfected. Sometimes it works, and sometimes some dependencies are missed. A sequential, manual execution of all commands in _setup.sh is recommended for the time being.
+
+MAIN WORK OUTSTANDING:
+* Continue testing background functionality of cronjob.
+    * After `cron` background testing is complete, figure out why `termux-open-url` stopped working in the notifications.
+        * As of 16Jun2024, the per-execution and daily notifications no longer navigate to the company "Careers" page. Why?
+        * As of 18Jun2024, after no changes to that functionality at all, the per-execution notifications **do** launch the default browser and navigate to the "Careers" page, but the daily notifications do **not**.
+* Fix _setup.sh so that it always functions completely and perfectly. The issue has not yet been identified.
+    * Omit this thought if this doesn't happen again before I finish everything, but I may want to make a note about force-quitting the app if it begins printing "y" to the terminal in an infinite loop.
+    * If I can't figure out how to make setup flawless every time (which I will), then I need a note about potential errors.
+* Finishing the README:
+    * I need to add a screen recording of the app working when it's all running in the final implementation so that potential employers don't need to bother with trying to isntall. Use the "updates detected" notifications to show full functionality.
+        * ***Start preparing for this 15 minutes beforehand so I get it in one go.***
+            * Open Termux. Type in the command to run scrape_jobs.py manually. DO NOT SEND.
+            * Navigate to the home screen.
+            * Locate screen recording function and try it once to make sure I know what to expect.
+            * Open Google Chrome to a new tab (so there's no possibility of personal info being displayed).
+            * Open Clock > World Clock to see what the current time is to the second.
+            * Go to the "all apps" screen and close everything but Termux, Chrome, and Clock (for privacy).
+                * Make sure the apps suggested on the bottom are not incriminating (not that I have anything that's actually incriminating).
+            * CLEAR ALL NOTIFICATIONS CONTAINING PERSONAL DATA.
+            * Begin recording 60 seconds before the daily notification arrives.
+                * Can record the clock screen to avoid showing personal data.
+            * After notification arrives, pull down notifications to display it and expand it.
+                * DO NOT CLICK IT ON ACCIDENT.
+            * Without clearning notification, nav to Termux.
+            * Send the manual script execution command.
+                * OPEN NOTIFICATIONS BEFORE IT FINISHES.
+            * Watch per-execution notification come in.
+            * Expand the daily notification and click on it.
+                * Capture the launch of the company site.
+            * Stop recording.
+    * Note about having mirror groups for NA, SA, and Europe? Recommend reordering them based on location?
+    * FOR THE LOVE OF GOD, SET THE PROJECT VERSION BEFORE YOU RELEASE IT AGAIN.
+*****
+*****
+*****
+*****
+*****
+
 ## Description
 This application alerts users of updates to a specified company's (or companies') "Careers" page via notifications on their Android phone. This is acheived by using Termux, Selenium, and Beautiful Soup on an Android phone to scrape web content, by using `cronie` to schedule Python script execution in Termux, and by using the `at` service to schedule single-occurrence events such as sending notifications to the user's phone. **Note:** This application does **not** require rooting of the Android phone.
 
@@ -193,47 +233,3 @@ I created this application for two reasons.
 1. I want to be a software engineer and will need a job soon. This application will help me monitor companies that I am interested in for jobs that I am qualified to apply to. It also serves as a portfolio piece for said jobs.
     * "Hello, Highway Kebabbery, we are not the slightest bit concerned that you built a program to stalk our "Careers" page on a three-hourly basis day-and-night in the hopes of finding employment here. That does not put us off at all. Please come in for your interview."
 2. I used to bot on Runescape. I found it rather enjoyable to try and improve the performance of the bots I found by tweaking their code. One simple tactic I employed was to add a randomization fucntion for every mouseclick command so as to better avoid their macro detection system. As my confidence ballooned after much success, so, too, did my attention to detail dwindle. Ultimately, I tested one bot for too long without the click randomization function and my childhood account was banned. I made a very rational and contrite appeal to Jagex four years later and after much personal growth, but I was denied. It was very unfair, and a lot of people are really unhappy about this. As such, my tertiary life-goal is to infiltrate Jagex by gaining so much experience that I would be impossible to turn down after an interview. I am going to make them an offer they cannot refuse. Once I am hired at Jagex at some indeterminate point in the future, and once I have a role with write access to their database, then I am going to `UPDATE player_accounts SET banned = 'F' WHERE account_name = '<my_account_name>'`.
-    * Yes, this is probably ever-so-slightly unethical, but I think we need to ask whether they had it coming considering that they can't even stop a simple web-scraper on their "Careers" page with their bot-detection system. /s
-
-*****
-*****
-*****
-*****
-*****
-MAIN WORK OUTSTANDING:
-* Continue testing background functionality of cronjob.
-    * After `cron` background testing is complete, test the script updates (refactored code) on Android.
-        * As of yesterday, the per-execution and daily notifications no longer navigate to the company "Careers" page. Why?
-* Fix -setup.sh so that it always functions completely and perfectly. Wth is wrong with it?
-    * Omit this thought if this doesn't happen again before I finish everything, but I may want to make a note about force-quitting the app if it begins printing "y" to the terminal in an infinite loop.
-    * If I can't figure out how to make setup flawless every time (which I will), then I need a note about potential errors.
-* Finishing the README:
-    ** I need to add screen recording of the app working when it's all running in the final implementation. USE THE KRONK PICS SO THE FAILURE PIC IS A SURPRISE.
-        * ***Start preparing for this 15 minutes beforehand so I get it in one go.***
-            * Open Termux. Type in the command to run scrape_jobs.py manually. DO NOT SEND.
-            * Nav to home screen.
-            * Locate screen recording function and try it once to make sure I know what to expect.
-            * Open Google Chrome TO A NEW TAB.
-            * Open Clock > World Clock to see what the current time is to the second.
-            * Go to the "all apps" screen and close everyuthing but Termux, Chrome, and Clock for privacy.
-                * Make sure the apps suggested on the bottom are not incriminating (not that I have anything that's actually incriminating).
-            * CLEAR ALL NOTIFICATIONS CONTAINING PERSONAL DATA.
-            * Begin recording 60 seconds before execution.
-                * Can record the clock screen to avoid showing personal data.
-            * After notification arrives, pull down notifications to display it and expand it.
-                * DO NOT CLICK IT ON ACCIDENT.
-            * Without clearning notification, nav to Termux.
-            * Send the manual script execution command.
-                * OPEN NOTIFICATIONS BEFORE IT FINISHES.
-            * Watch per-execution notification come in.
-            * Expand the daily notification and click on it.
-                * Capture the launch of the company site.
-            * Stop recording.
-    * Note about having mirror groups for NA, SA, and Europe? Recommend reordering them based on location?
-    * FOR THE LOVE OF GOD, SET THE PROJECT VERSION BEFORE YOU RELEASE IT AGAIN.
-
-
-
-
-
-
