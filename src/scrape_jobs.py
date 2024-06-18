@@ -1,25 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 """
+    Features:
     main() builds company objects, scrapes current jobs, compares to previous jobs, and reports updates.
         * Users receive one daily update notification:
             * If an update was found yesterday, the daily notification informs the user.
             * If no updates were found, the daily notification informs the user of their continued unemployment.
         * In addition, when a listing update is detected, the user receives a per-execution notification on every subsequent run of the day to ensure visibility.
     
-    desktop_scraper() is a stripped down version for use on Windows-64 systems to easily test which attributes work for new commpany sites.
+    desktop_scraper() is a version of main() that's been stripped down for Windows-64 systems. It is used to easily test which attributes work for scraping new commpany job pages.
         
-    How to use:
-    * To track new companies:
-        * Check the company's robots.txt and respect their wishes.
-        * Comment out the main() entry point and use uncomment the desktop_scraper() entry point.
-        * Use desktop_scraper() to identify the requisite attributes for company listing job titles
-        * In main(), create and fill out a company attributes list and add that list to the list of companies below.
-    * No two companies should have the same name in the first position of their attribute list.
-    * Instantiating this_execution:
-        * Always make sure the version number matches the release number you're using.
-        * Set mobile=False when testing only the job scraping functionality on a Windows system.
-        * Set fast_notifications=True when notifications are needed quickly for testing.
+    View the main() or desktop_scraper() docstrings for more detailed information.
 """
 
 import os
@@ -328,10 +319,30 @@ class LogExecution():
                 file.close()
 
 def main():
-    """Production version of the program. Intended to run on Android in Termux. See the global docstring for details.
     """
-    # Company name (unique), careers page url, target tag, target attribute, targeting child of target attribute?
-    jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', 'styles--3TJHk', True]
+        Features:
+        main() builds company objects, scrapes current jobs, compares to previous jobs, and reports updates.
+            * Users receive one daily update notification:
+                * If an update was found yesterday, the daily notification informs the user.
+                * If no updates were found, the daily notification informs the user of their continued unemployment.
+            * In addition, when a listing update is detected, the user receives a per-execution notification on every subsequent run of the day to ensure visibility.
+        
+        desktop_scraper() is a version of main() that's been stripped down for Windows-64 systems. It is used to easily test which attributes work for scraping new commpany job pages.
+            
+        How to use:
+        * To track new companies:
+            * Check the company's robots.txt and respect their wishes.
+            * Comment out the main() entry point and uncomment the desktop_scraper() entry point.
+            * Follow the instructions in the desktop_scraper() docstring to test the scraper on new companies.
+            * In main(), create and fill out a new company attributes list and then add that list's name to `companies`.
+        * No two companies should have the same name in the first position of their attribute list.
+        * Instantiating `this_execution`:
+            * Always make sure the version number matches the release number you're using.
+            * Set fast_notifications=True when notifications are needed quickly for testing.
+    """
+    # Company details
+    # example_company_name = ['unique_company_name', 'careers_page_url', 'html_tag_with_targeted_attribute', 'unique_target_attribute_value', does_child_of_targeted_tag_contain_job_title_Boolean]
+    jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', 'styles--3TJHk', True]    
     companies = [jagex]
 
     # Validate that no two companies 'n' have the same name in companies[n][0].
@@ -392,15 +403,17 @@ def main():
 
 def desktop_scraper():
     """
-        This function acts as a truncated version of main() for use on a desktop. The it returns company job listing titles to the command line.
-        Its purpose is to easily troubleshoot the webscraping functionality on a desktop (non-mobile) machine rather than trying to handle that task on a phone.
+        desktop_scraper() is a version of main() that's been stripped down for Windows-64 systems. It is used to easily test which attributes work for scraping new commpany job pages.
 
         How to use:
-            * Review the global docstring for all information.
+            * Check the company's robots.txt and respect their wishes.
             * Comment out the main() entry point and uncomment the desktop_scraper() entry point.
             * Excute the script from the parent project folder, otherwise the path will be built incorrectly.
             * The script needs to be executed from the terminal; the VS Code debugger won't work.
-            * When testing is complete, follow the global docstring instructions to add the newly ready-to-scrape company to main().
+            * Inspect the company job listings webpage to lcoate the appropriate html tag and attribute value.
+            * Fill out `new_company` with the relevant information.
+            * Execute the script from the command line.
+            * When testing is complete, return to main and update the company details section.
             * Be sure to uncomment main() and re-comment desktop_scraper() when finished.
     """
     # Company name (unique), careers page url, target tag, target attribute, targeting child of target attribute?
@@ -408,10 +421,7 @@ def desktop_scraper():
     companies = [new_company]
 
     # Begin execution
-    this_execution = ThisExecution(
-        project_version='0.4.3',
-        mobile=False
-        )
+    this_execution = ThisExecution(mobile=False)
 
     for company in companies:
         company_object = CompanyJobsFinder(
@@ -434,12 +444,5 @@ if __name__ == '__main__':
 
 """
 Notes for future work:
-* What happens if they remove all listings and there's nothing to return? It'll fail, but I don't know how to test how to account for that until after a company I successfully targeted removes all listings.
-* The program currently only checks whether the listings changed. This will register removals as well as new listings.
-    * I can check to see if each current job is in the past jobs to detect new listings.
-    * I can filter for keywords to narrow down my results.
-        * The downside is that I'll miss any roles that I'm not specifically looking for, which may potentially include something applicable to me.
-        * The upside is that it would be easier to target large companies with a lot of irrelevant listings.
-* I'm going to need to handle instances where there are multiple pages of jobs.
-    * This can likely be handled with the addition of a CompanyJobsFinder.__navigation() method that accepts unique-to-the-company identifiers and information about page-forward/back buttons.
+* I've accounted for this in the README, but will leave this section for future notes while working on the script.
 """
