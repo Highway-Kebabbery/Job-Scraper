@@ -440,7 +440,7 @@ def desktop_scraper():
 
 if __name__ == '__main__':
     main()
-    #desktop_scraper()
+    #desktop_scraper()    # Used to test the web-scraper in isolation on Windows when trying to scrape new companies.
 
 """
 Notes for future work:
