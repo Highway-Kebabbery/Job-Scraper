@@ -218,6 +218,7 @@ Through this project, I:
 **General:**
 
 Through this project, I:
+* Learned that testing if a file exists can create race conditions, so it's best to just try to open it and handle exceptions accordingly.
 * Gained experience with test design.
     * I am a trained scientist, so this is trivial for me, but I understand that potential employers may be interested to see my work in the context of software. The majority of the test plan for this application is available in the description of [this release](https://github.com/Highway-Kebabbery/Job-Scraper/releases/tag/v0.4.1).
 * Gained experience with project design.
