@@ -1,14 +1,8 @@
 # <div align="center">Job Scraper</div>
 
-Note that this application is still undergoing alpha testing to understand the effects of various degrees of background status on the continued periodic function of Termux, `crond`, and `atd`. It is currently unknown whether de-optimizing Termux and Termux:API for battery performance while leaving on the battery optimization of the entire phone will interfere with Termux, `crond`, or `atd` after periods of extended disuse. Recommendations based on the findings will be added to the ["Download Required Apps and Set Permissions"](#download-required-apps-and-set-permissions) section when testing is complete.
-
 Note that the _setup.sh file has not yet been perfected. Sometimes it works, and sometimes some dependencies are missed. A sequential, manual execution of all commands in _setup.sh is recommended for the time being.
 
 MAIN WORK OUTSTANDING:
-* Continue testing background functionality of cronjob.
-    * After `cron` background testing is complete, figure out why `termux-open-url` stopped working in the notifications.
-        * As of 16Jun2024, the per-execution and daily notifications no longer navigate to the company "Careers" page. Why?
-        * As of 18Jun2024, after no changes to that functionality at all, the per-execution notifications **do** launch the default browser and navigate to the "Careers" page, but the daily notifications do **not**.
 * Fix _setup.sh so that it always functions completely and perfectly. The issue has not yet been identified.
     * Omit this thought if this doesn't happen again before I finish everything, but I may want to make a note about force-quitting the app if it begins printing "y" to the terminal in an infinite loop.
     * If I can't figure out how to make setup flawless every time (which I will), then I need a note about potential errors.
@@ -97,8 +91,9 @@ I am currently only targeting smaller companies with a relatively small number o
 4. Install FX File Explorer from the <u>Google Play store</u> ([for reference](https://play.google.com/store/apps/details?id=nextapp.fx)).
 5. Navigate to `Settings > Apps > Termux` and allow Termux to send notifications. Do the same for Termux:API.
 6. Navigate to `Settings > Apps > Termux`, check Termux for battery-related settings, and set them to "unrestricted" or otherwise to not be optimized for battery life. Do the same for Termux:API.
-7. Navigate to `Settings > Apps > three-dot menu > Special Access > All files access > FX` and enable access.
-8. In `Settings > Battery`, check `Background usage limits > Never auto sleeping apps` for any Termux related apps.
+7. Navigate to `Settings > Apps > Termux > Draw over other apps` and allow permission, otherwise `--action termux-open-url` won't open webpages from the notification.
+8. Navigate to `Settings > Apps > three-dot menu > Special Access > All files access > FX` and enable access.
+9. In `Settings > Battery`, check `Background usage limits > Never auto sleeping apps` for any Termux related apps.
     * As of Android 14, turning off battery optimization removes them from this list, but it is best practice to ensure absolutely no battery optimization happens for these apps.
 
 #### Configure FX File Explorer:
@@ -138,20 +133,29 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
     * Open Termux, ensure you are in the home directory, and run `./Job-Scraper-<version number>/Schedule_Job_Scraper.sh`.
     * To check whether the job was started, run `crontab -l`.
         * If the job was started, then `crontab -l` will display `0 */3 * * * /data/data/com.termux/files/home/Job-Scraper-*/src/scrape_jobs.py`.
+        * Check the text file at `Job-Scraper-<version number>/logs/execution_log.csv` for evidence of continuous execution
     * To stop the job, run `crontab -e` and comment out the cronjob by adding `#` to the front of it.
         * Alternatively, the job can be deleted from within the crontab editor.
         * Alternatively, `crontab -r` will delete **all** active cronjobs from the crontab.
     * The application is designed to treat the first day of scraping a company website as a positive listing update identification, so it will send a notification on every execution that day.
         * This cronjob, `0 */3 * * *`, will run at 0000, 0300, 0600, 0900, 1200, 1500, 1800, 1900, and 2100 every day regardless of the time at which it was started.
+    * **Note:** For continuous execution, Termux must be left open in the background.
+        * When finished in Termux. Exit to the home screen of the phone and resume normal use. Leave Termux open in the "all apps" page. Leave the persistent Termux notification in the notifications bar.
+        * The program does appear to run with the same consistencty when Termux is "closed" from the "all apps" page, but it's absolutely necessary to leave the persistent Termux notification in the notifications bar.
 2. Adding companies to track:
     * Read the main() docstring within scrape_jobs.py for detailed context on the Python script's functionality.
     * To track new companies:
         * Check the company's robots.txt and respect their wishes.
-        * Comment out the main() entry point and uncomment the desktop_scraper() entry point.
+        * Testing is easier on a Windows desktop. Comment out the main() entry point and uncomment the desktop_scraper() entry point.
         * Follow the instructions in the desktop_scraper() docstring to test the scraper on new companies.
         * In main(), create and fill out a new company attributes list and then add that list's name to `companies`.
+        * Re-comment the desktop_scraper() entry point and uncomment the main() entry point after testing.
 3. Changing execution frequency:
     * Either edit Schedule_Job_Scraper.sh or run `crontab -e` in Termux to edit the cronjob.
+4. Intermittent failure:
+    * Termux will occasionalyl be affected by background processes of the Android device. The main clue that execution has stopped is the failure of a daily notification to appear for each tracked company at 1000.
+    * To resume execution: open Termux, run `crontab -e`, make and save a minor edit to a cronjob, then run `crontab -e` again and set the altered cronjob back to its original setting.
+        * There may be other ways to resume execution, but this has worked for me.
 
 
 ## Technology
@@ -167,6 +171,8 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
 * **Bash:** Bash shell scripts were used to to automate the setup of the Termux environment upon installation, to set up the cronjob that runs the application, and to store instructions for notifications to be executed after the Python script finished executing.
 * **JSON:** .json files were a natural choice for storing the results of each execution for comparison at a later time.
 
+*****
+*****
 
 ## What I Learned
 Given that I was already familiar with Python, many of the most challenging parts of this project were related to the configuration of the emulated Linux environment running on an Android phone.
