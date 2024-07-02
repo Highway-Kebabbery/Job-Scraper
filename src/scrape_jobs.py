@@ -479,7 +479,8 @@ Notes for future work:
 * I've accounted for this in the README, but will leave this section for future notes while working on the script.
 """
 
-
+# WHEN I PICK BACK UP: Focus on getting the show next/more button functionality added.
+# I can worry about making the .find_all() kwarg flexible later.
 
 '''
     loads_by_page: bool flag to determine whether the site's button shows all jobs (i.e. "Show more" functionality) or whether it shows next page
