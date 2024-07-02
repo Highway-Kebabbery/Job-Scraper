@@ -66,11 +66,12 @@ class CompanyJobsFinder():
     __driver = None
     __company_name = ''
     __url = ''
-    __target_tag = ''
-    __target_attribute_value = ''
+    __job_title_tag = ''
+    __job_title_tag_attr_val = ''
     __company_data_filepath = ''
     __current_jobs = []
     __previous_jobs = []
+    __class_by_selector = None
 
     # Notification content
     __new_jobs_today_msg_title = ''
@@ -87,20 +88,44 @@ class CompanyJobsFinder():
     __notification_script_filepath = ''
     __bash_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
 
-    def __init__(self, company_name, url, target_tag, target_attribute_value, wd, project_version, mobile, fast_notifications):
+    def __init__(self, company_name, url, job_title_tag, job_title_tag_attr_val, class_by_selector, wd, project_version, mobile, fast_notifications):
         self.__set_firefox_driver(mobile)
         self.__company_name = company_name
         self.__url = url
-        self.__target_tag = target_tag
-        self.__target_attribute_value = target_attribute_value
+        self.__job_title_tag = job_title_tag
+        self.__job_title_tag_attr_val = job_title_tag_attr_val
+        
+        # Use the attribute that identifies the job title tag to set the Selenium `By` method to be called.
+        match class_by_selector:
+            case 'id':
+                self.__class_by_selector = By.ID
+            case 'name':
+                self.__class_by_selector = By.NAME
+            case 'xpath':
+                self.__class_by_selector = By.XPATH
+            case 'link text':
+                self.__class_by_selector = By.LINK_TEXT
+            case 'partial link text':
+                self.__class_by_selector = By.PARTIAL_LINK_TEXT
+            case 'tag name':
+                self.__class_by_selector = By.TAG_NAME
+            case 'class name':
+                self.__class_by_selector = By.CLASS_NAME
+            case 'css selector':
+                self.__class_by_selector = By.CSS_SELECTOR
+            case _:
+                print('Invalid class_by_selector argument passed to CompanyJobsFinder.0')
+                raise SystemExit
+
+        # Configure notification parameters
         self.__new_jobs_today_msg_title = f'Job listings updated today for {company_name}!'
         self.__new_jobs_yesterday_msg_title = f'Job listings updated yesterday for {company_name}!'
         self.__no_jobs_yesterday_msg_title = f'No new jobs yesterday at {company_name}.'
-        self.__project_version = project_version
-        self.__wd = wd
         self.__fast_notifications = fast_notifications
 
         # Build file paths
+        self.__project_version = project_version
+        self.__wd = wd
         self.__gecko_driver_path = f'/{self.__wd}/src/drivers/win64/geckodriver.exe'
         self.__company_data_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/data/{self.__company_name}.json'
         self.__no_job_jpg_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/media/no_job.jpg'
@@ -177,27 +202,32 @@ class CompanyJobsFinder():
         # When the target element is present, scrape and parse html.
         try:
             WebDriverWait(self.__driver, 20).until(
-                EC.presence_of_element_located((By.CLASS_NAME, self.__target_attribute_value))
+                EC.presence_of_element_located((self.__class_by_selector, self.__job_title_tag_attr_val))
             )
         except Exception as e:
-            print(f"Failed to load job listings: {e}")
+            # This is where I'll put logic to handle the event where all jobs have been removed and none are available.
+            # I can set logic in main()/desktop_scraper() to check whether current_jobs is empty, and if so I can just schedule the daily failure notification?
             return []
-        
-        html = self.__driver.page_source
-        soup = BeautifulSoup(html, 'html.parser')
-
-        # Locate job titles.
-        tags = soup.find_all(self.__target_tag, class_=self.__target_attribute_value)
-        if child == False:
-            for target_tag in tags:
-                self.__current_jobs.append(target_tag.string)
         else:
-            # Pull the string from the child of each uniquely identifiable parent tag.
-            # Only works if there's only one child.
-            for parent_tag in tags:
-                self.__current_jobs.append(parent_tag.find().string)
-        
-        self.__driver.quit()
+            html = self.__driver.page_source
+            soup = BeautifulSoup(html, 'html.parser')
+
+            # Locate job titles.
+            # It would be nice to figure out how to flexibly pass in a kwarg that matches self.__class_by_selector.
+            # When I can do that, I can change method name to set_current_jobs, because one method handles all possible attributes I could use.
+            # I'll do that later... I need to get the "show more" button feature working first.
+            tags = soup.find_all(
+                self.__job_title_tag, class_=self.__job_title_tag_attr_val)
+            if child == False:
+                for job_title_tag in tags:
+                    self.__current_jobs.append(job_title_tag.string)
+            else:
+                # Pull the string from the child of each uniquely identifiable parent tag.
+                # Only works if there's only one child.
+                for parent_tag in tags:
+                    self.__current_jobs.append(parent_tag.find().string)
+        finally:
+            self.__driver.quit()
 
     def dump_current_jobs_json(self, update_detected):
         """This method saves the current job listings to a .json file for comparison to the old job listings.
@@ -341,8 +371,8 @@ def main():
             * Set fast_notifications=True when notifications are needed quickly for testing.
     """
     # Company details
-    # example_company_name = ['unique_company_name', 'careers_page_url', 'html_tag_with_targeted_attribute', 'unique_target_attribute_value', does_child_of_targeted_tag_contain_job_title_Boolean]
-    jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', 'styles--3TJHk', True]    
+    # example_company_name = ['unique_company_name', 'careers_page_url', 'html_tag_containing_job_title', 'unique_job_title_tag_attr_val', does_child_of_targeted_tag_contain_job_title_Boolean]
+    jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', 'styles--3TJHk', True, 'class name']    
     companies = [jagex]
 
     # Validate that no two companies 'n' have the same name in companies[n][0].
@@ -372,6 +402,7 @@ def main():
             company[1],
             company[2],
             company[3],
+            company[5],
             this_execution.wd,
             this_execution.project_version,
             this_execution.mobile,
@@ -417,7 +448,7 @@ def desktop_scraper():
             * Be sure to uncomment main() and re-comment desktop_scraper() when finished.
     """
     # Company name (unique), careers page url, target tag, target attribute, targeting child of target attribute?
-    new_company = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', 'styles--3TJHk', True]
+    new_company = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', 'styles--3TJHk', True, 'class name']
     companies = [new_company]
 
     # Begin execution
@@ -429,6 +460,7 @@ def desktop_scraper():
             company[1],
             company[2],
             company[3],
+            company[5],
             this_execution.wd,
             this_execution.project_version,
             this_execution.mobile,
@@ -439,10 +471,26 @@ def desktop_scraper():
         print(company_object.current_jobs)       
 
 if __name__ == '__main__':
-    main()
-    #desktop_scraper()    # Used to test the web-scraper in isolation on Windows when trying to scrape new companies.
+    #main()
+    desktop_scraper()    # Used to test the web-scraper in isolation on Windows when trying to scrape new companies.
 
 """
 Notes for future work:
 * I've accounted for this in the README, but will leave this section for future notes while working on the script.
 """
+
+
+
+'''
+    loads_by_page: bool flag to determine whether the site's button shows all jobs (i.e. "Show more" functionality) or whether it shows next page
+        If all are shown, then click button until it no longer exists.
+        If one page is shown, then scrape the jobs, click "show next," and repeat until "Show next" doesn't exist.
+    button_tag: str variable to identify the tag out button is contained in
+    button_tag_attr_val: str variable with the show more/next button's unique id
+
+    I think I should rework set_jobs_by_class such that it is actually just a selection with inner loops to handle the loads_by_pages cases. Each of those
+    selection paths would run a new method, scrape_titles, as appropriate. scrape_titles will be the existing logic of set_jobs_by_class.
+    Further, I should 
+
+    See __set_current_jobs_by_class (before reworking old logic into __scrape_titles). Figure out how to flexibly choose a kwarg_ that matches __class_by_selector.
+'''
