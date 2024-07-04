@@ -1,7 +1,6 @@
 # <div align="center">Job Scraper</div>
 
 MAIN WORK OUTSTANDING:
-* The .json for the second company analyzed contained both the titles available at the first company and the second company.
 * The script might break when a targeted company removes all listings, but I'm not sure exactly how that will happen. I need to figure out which error this would return, or otherwise what unique feature may be of use in identifying this case. If I can handle the error when the scraper returns nothing, then the `__current_jobs` list should remain empty and I can write logic for that special case in main()/desktop_scraper(). The `Titles` section of the company .json would be empty.
     * I'll try to account for this later by attempting to target either empty or non-existent tag/attribute pairs.
 * Finishing the README:
