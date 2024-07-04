@@ -32,7 +32,8 @@ termux-change-repo || { echo -e "\n\n\nFailed to change repo.\n\n\n"; exit 1; }
 echo -e "\n\n\nCompleted initial configuration.\n\n\n"
 
 echo -e "\n\n\nInstalling Termux dependencies...\n\n\n"
-yes | pkg install termux-api cronie at python-pip x11-repo firefox geckodriver -y || { echo -e "\n\n\nFailed to install Termux dependencies.\n\n\n"; exit 1; }
+yes | pkg install termux-api cronie at python-pip x11-repo geckodriver -y || { echo -e "\n\n\nFailed to install Termux dependencies (Firefox not included in this group).\n\n\n"; exit 1; }
+yes | pkg install firefox -y || { echo -e "\n\n\nFailed to install Firefox.\n\n\n"; exit 1; }
 echo -e "\n\n\nTermux dependencies installed.\n\n\n"
 
 echo -e "\n\n\nInstalling Python dependencies...\n\n\n"
