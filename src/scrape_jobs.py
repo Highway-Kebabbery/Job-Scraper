@@ -250,7 +250,7 @@ class CompanyJobsFinder():
             def click_button():
                 try:
                     button = WebDriverWait(self.__driver, 5).until(
-                        EC.element_to_be_clickable((By.XPATH, f'//button[text()="{self.__show_more_button_text}"]'))
+                        EC.element_to_be_clickable((By.XPATH, f'//button[{self.__show_more_button_text}]'))
                     )
                     self.__driver.execute_script('arguments[0].scrollIntoView(true);', button)
                     self.__driver.execute_script('arguments[0].click();', button)
@@ -426,11 +426,12 @@ def main():
         'name_of_attribute_used_for_job_title_tag_selection' (**NOTE**: THIS WILL FAIL IF YOU DON'T USE A VALID VALUE. NOT ALL OF THESE HAVE BEEN TESTED YET. The name of the attribute used to uniquely select job title tag (e.g. 'id', 'name', 'xpath', 'link text', 'partial link text', 'tag name', 'class name', 'css selector')),
         'unique_job_title_tag_attr_val' (a unique attribute for targeting job title tags),
         do_job_titles_load_by_individual_pages_Boolean (i.e. Is there a button like "show next" that loads one page at a time, only displaying some of the job titles (True), or is there a button like "show more" that, when clicked, displays all previously visible job titles **and** a new set of titles all at once after being clicked (False)?),
-        'show_more/next_button_text' (button text for the button that scrolls between jobs)
+        'show_more/next_button_identifier' (Identifier for finding show more/next button by xpath. e.g. enter 'text()="Show more"' to get a final xpath of '//button[text()="Show more"]'. Another example would be 'contains(@aria-label, "next")'.)
     ]
     '''
-    jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', True, 'class name', 'styles--3TJHk', False, 'Show more']
-    companies = [jagex]
+    jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', True, 'class name', 'styles--3TJHk', False, 'text()="Show more"']
+    resilience = ['Resilience', 'https://resilience.wd1.myworkdayjobs.com/Resilience_Careers', 'a', False, 'class name', 'css-19uc56f', True, 'contains(@aria-label, "next")']
+    companies = [jagex, resilience]
 
     # Validate that no two companies 'n' have the same name in companies[n][0].
     company_names = [company[0] for company in companies]
@@ -470,7 +471,7 @@ def main():
         
         # Compare current jobs to last execution's findings
         company_object.set_previous_jobs()
-        company_object.set_current_jobs(child=company[4])
+        company_object.set_current_jobs(child=company[3])
         if company_object.previous_jobs['Titles'] != company_object.current_jobs:
             update_detected = True
             company_object.dump_current_jobs_json(update_detected)
@@ -517,10 +518,10 @@ def desktop_scraper():
         'name_of_attribute_used_for_job_title_tag_selection' (**NOTE**: THIS WILL FAIL IF YOU DON'T USE A VALID VALUE. NOT ALL OF THESE HAVE BEEN TESTED YET. The name of the attribute used to uniquely select job title tag (e.g. 'id', 'name', 'xpath', 'link text', 'partial link text', 'tag name', 'class name', 'css selector')),
         'unique_job_title_tag_attr_val' (a unique attribute for targeting job title tags),
         do_job_titles_load_by_individual_pages_Boolean (i.e. Is there a button like "show next" that loads one page at a time, only displaying some of the job titles (True), or is there a button like "show more" that, when clicked, displays all previously visible job titles **and** a new set of titles all at once after being clicked (False)?),
-        'show_more/next_button_text' (button text for the button that scrolls between jobs)
+        'show_more/next_button_identifier' (Identifier for finding show more/next button by xpath. e.g. enter 'text()="Show more"' to get a final xpath of '//button[text()="Show more"]'. Another example would be 'contains(@aria-label, "next")'.
     ]
     '''
-    new_company = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', True, 'class name', 'styles--3TJHk', False, 'Show more']
+    new_company = ['Resilience', 'https://resilience.wd1.myworkdayjobs.com/Resilience_Careers', 'a', False, 'class name', 'css-19uc56f', True, 'contains(@aria-label, "next")']
     companies = [new_company]
 
     # Begin execution
@@ -541,12 +542,12 @@ def desktop_scraper():
             this_execution.fast_notifications
             )
 
-        company_object.set_current_jobs(child=company[4])
+        company_object.set_current_jobs(child=company[3])
         print(company_object.current_jobs)       
 
 if __name__ == '__main__':
-    main()
-    #desktop_scraper()    # Used to test the web-scraper in isolation on Windows when trying to scrape new companies.
+    #main()
+    desktop_scraper()    # Used to test the web-scraper in isolation on Windows when trying to scrape new companies.
 
 """
 Notes for future work:
