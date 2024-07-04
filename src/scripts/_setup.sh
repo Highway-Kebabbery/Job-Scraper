@@ -1,33 +1,34 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-setup_mirrors() {
-    local repo_file="$PREFIX/etc/apt/sources.list"
-    echo -e \n\n\nSetting up mirrors...\n\n\n
-    cat <<EOF > $repo_file
-# North America mirrors
-deb https://termux.mentality.rip/termux-main stable main
-deb https://packages.termux.org/termux-main stable main
-deb https://termux.mirror.server.com/termux-main stable main
+#setup_mirrors() {
+#    local repo_file="$PREFIX/etc/apt/sources.list"
+#    echo -e \n\n\nSetting up mirrors...\n\n\n
+#    cat <<EOF > $repo_file
+## North America mirrors
+#deb https://termux.mentality.rip/termux-main stable main
+#deb https://packages.termux.org/termux-main stable main
+#deb https://termux.mirror.server.com/termux-main stable main
 
 # South American mirrors
-deb https://termux.net.br mirror/termux stable main
-deb https://termux.espelhosdigirati.com/termux stable main
-deb https://termux.mirror.premi.st/termux stable main
+#deb https://termux.net.br mirror/termux stable main
+#deb https://termux.espelhosdigirati.com/termux stable main
+#deb https://termux.mirror.premi.st/termux stable main
 
 # European mirrors
-deb https://termux.mirror.eu/termux-main stable main
-deb https://termux.mirror1.eu/termux-main stable main
-deb https://termux.mirror2.eu/termux-main stable main
-EOF
-    echo -e \n\n\nMirrors set up successfully.\n\n\n
-}
+#deb https://termux.mirror.eu/termux-main stable main
+#deb https://termux.mirror1.eu/termux-main stable main
+#deb https://termux.mirror2.eu/termux-main stable main
+#EOF
+#    echo -e \n\n\nMirrors set up successfully.\n\n\n
+#}
 
 # Initial configuration
-echo -e \n\n\nStarting initial configuration...\n\n\n
+echo -e "\n\n\nStarting initial configuration...\n\n\n"
 yes | pkg update -y || { echo -e \n\n\nFailed to update packages.\n\n\n; exit 1; }
 yes | pkg upgrade -y || { echo -e \n\n\nFailed to upgrade packages.\n\n\n; exit 1; }
-setup_mirrors
-echo -e \n\n\nCompleted initial configuration.\n\n\n
+#setup_mirrors
+termux-change-repo || { echo -e \n\n\nFailed to change repo.\n\n\n; exit 1; }
+echo -e "\n\n\nCompleted initial configuration.\n\n\n"
 
 echo -e \n\n\nInstalling Termux dependencies...\n\n\n
 yes | pkg install termux-api cronie at python-pip x11-repo firefox geckodriver -y || { echo -e \n\n\nFailed to install Termux dependencies.\n\n\n; exit 1; }
