@@ -6,6 +6,7 @@ MAIN WORK OUTSTANDING:
 * Fix _setup.sh so that it always functions completely and perfectly. The issue has not yet been identified.
     * Omit this thought if this doesn't happen again before I finish everything, but I may want to make a note about force-quitting the app if it begins printing "y" to the terminal in an infinite loop.
     * If I can't figure out how to make setup flawless every time (which I will), then I need a note about potential errors.
+    * Note about having mirror groups for NA, SA, and Europe? Recommend reordering them based on location?
 * Finishing the README:
     * I need to add a screen recording of the app working when it's all running in the final implementation so that potential employers don't need to bother with trying to isntall. Use the "updates detected" notifications to show full functionality.
         * ***Start preparing for this 15 minutes beforehand so I get it in one go.***
@@ -28,7 +29,8 @@ MAIN WORK OUTSTANDING:
             * Expand the daily notification and click on it.
                 * Capture the launch of the company site.
             * Stop recording.
-    * Note about having mirror groups for NA, SA, and Europe? Recommend reordering them based on location?
+    * Need to test companies that have scroll-through job pages that only show some of the total available listings.
+    * For the match-case in `CompanyJobsFinder.set_current_jobs()`, I will eventually need to figure out which kwarg works for each selector. I've only verified this for `class name` so far.
     * FOR THE LOVE OF GOD, SET THE PROJECT VERSION BEFORE YOU RELEASE IT AGAIN.
 *****
 *****
@@ -48,7 +50,7 @@ This application alerts users of updates to a specified company's (or companies'
 * Navigates through "Careers" sections with multiple pages using Selenium.
 
 ### Planned:
-I am currently only targeting smaller companies with a relatively small number of job listings that fit on one webpage. The following planned features will allow me to target larger companies which may have a vast number of listings that are unrelated to me and spread across multiple pages requiring the use of, *e.g.*, a "Next" button to navigate through.
+I am currently only targeting smaller companies with a relatively small number of job listings that fit on one webpage. The following planned features will allow me to target larger companies which may have a vast number of listings that are unrelated to me.
 * Detect only the addition of new jobs.
 * Filter job listings by specified keywords to narrow the search.
     * As a result, notifications can meaningfully contain the actual job titles available for application.

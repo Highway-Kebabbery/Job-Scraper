@@ -190,7 +190,7 @@ class CompanyJobsFinder():
         """
         return self.__current_jobs
     
-    def set_current_jobs_by_class(self, child=False):
+    def set_current_jobs(self, child=False):
         """This is the setter method for self.__current_jobs.
         This method gets a webpage and scrapes it for jobs. It can either operate on
         tags with unique identifiers, or the immediate child of a tag with a unique identifier.
@@ -219,10 +219,25 @@ class CompanyJobsFinder():
                 soup = BeautifulSoup(html, 'html.parser')
 
                 # Locate job titles.
-                # It would be nice to figure out how to flexibly pass in a kwarg that matches self.__title_class_by_selector.
-                # When I can do that, I can change method name to set_current_jobs, because one method handles all possible attributes I could use.
-                # I'll do that later... I need to get the "show more" button feature working first.
-                tags = soup.find_all(self.__job_title_tag, class_=self.__job_title_tag_attr_val)
+                # Hey, so... I've only actually tested this on 'class name'. I don't actually know yet whether the other cases work until I get around to finding a bunch of instances in which I need them to work.
+                match self.__title_class_by_selector:
+                    case 'id':
+                        tags = soup.find_all(self.__job_title_tag, id=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
+                    case 'name':
+                        tags = soup.find_all(self.__job_title_tag, name=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
+                    case 'xpath':
+                        tags = soup.find_all(self.__job_title_tag, xpath=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
+                    case 'link text':
+                        pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
+                    case 'partial link text':
+                        pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
+                    case 'tag name':
+                        pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
+                    case 'class name':
+                        tags = soup.find_all(self.__job_title_tag, class_=self.__job_title_tag_attr_val)
+                    case 'css selector':
+                        pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
+
                 if child == False:
                     for job_title_tag in tags:
                         self.__current_jobs.append(job_title_tag.string)
@@ -408,7 +423,7 @@ def main():
         'careers_page_url' (the web page containing job listings),
         'html_tag_containing_job_title' (the tag or parent of the tag containing the job titles),
         does_child_of_targeted_tag_contain_job_title_Boolean (sometimes job titles live inside indistinct tags that are children of uniquely targetable tags - is this the case, True or False?),
-        'name_of_attribute_used_for_job_title_tag_selection' (name of attribute used to uniquely select job title tag (e.g. 'id', 'name', 'xpath', 'link text', 'partial link text', 'tag name', 'class name', 'css selector')),
+        'name_of_attribute_used_for_job_title_tag_selection' (**NOTE**: THIS WILL FAIL IF YOU DON'T USE A VALID VALUE. NOT ALL OF THESE HAVE BEEN TESTED YET. The name of the attribute used to uniquely select job title tag (e.g. 'id', 'name', 'xpath', 'link text', 'partial link text', 'tag name', 'class name', 'css selector')),
         'unique_job_title_tag_attr_val' (a unique attribute for targeting job title tags),
         do_job_titles_load_by_individual_pages_Boolean (i.e. Is there a button like "show next" that loads one page at a time, only displaying some of the job titles (True), or is there a button like "show more" that, when clicked, displays all previously visible job titles **and** a new set of titles all at once after being clicked (False)?),
         'show_more/next_button_text' (button text for the button that scrolls between jobs)
@@ -455,7 +470,7 @@ def main():
         
         # Compare current jobs to last execution's findings
         company_object.set_previous_jobs()
-        company_object.set_current_jobs_by_class(child=company[4])
+        company_object.set_current_jobs(child=company[4])
         if company_object.previous_jobs['Titles'] != company_object.current_jobs:
             update_detected = True
             company_object.dump_current_jobs_json(update_detected)
@@ -499,7 +514,7 @@ def desktop_scraper():
         'careers_page_url' (the web page containing job listings),
         'html_tag_containing_job_title' (the tag or parent of the tag containing the job titles),
         does_child_of_targeted_tag_contain_job_title_Boolean (sometimes job titles live inside indistinct tags that are children of uniquely targetable tags - is this the case, True or False?),
-        'name_of_attribute_used_for_job_title_tag_selection' (name of attribute used to uniquely select job title tag (e.g. 'id', 'name', 'xpath', 'link text', 'partial link text', 'tag name', 'class name', 'css selector')),
+        'name_of_attribute_used_for_job_title_tag_selection' (**NOTE**: THIS WILL FAIL IF YOU DON'T USE A VALID VALUE. NOT ALL OF THESE HAVE BEEN TESTED YET. The name of the attribute used to uniquely select job title tag (e.g. 'id', 'name', 'xpath', 'link text', 'partial link text', 'tag name', 'class name', 'css selector')),
         'unique_job_title_tag_attr_val' (a unique attribute for targeting job title tags),
         do_job_titles_load_by_individual_pages_Boolean (i.e. Is there a button like "show next" that loads one page at a time, only displaying some of the job titles (True), or is there a button like "show more" that, when clicked, displays all previously visible job titles **and** a new set of titles all at once after being clicked (False)?),
         'show_more/next_button_text' (button text for the button that scrolls between jobs)
@@ -526,7 +541,7 @@ def desktop_scraper():
             this_execution.fast_notifications
             )
 
-        company_object.set_current_jobs_by_class(child=company[4])
+        company_object.set_current_jobs(child=company[4])
         print(company_object.current_jobs)       
 
 if __name__ == '__main__':
@@ -537,24 +552,3 @@ if __name__ == '__main__':
 Notes for future work:
 * I've accounted for this in the README, but will leave this section for future notes while working on the script.
 """
-
-# WHEN I PICK BACK UP: Focus on getting the show next/more button functionality added.
-# I can worry about making the .find_all() kwarg flexible later.
-
-'''
-    loads_by_page: bool flag to determine whether the site's button shows all jobs (i.e. "Show more" functionality) or whether it shows next page
-        If all are shown, then click button until it no longer exists.
-        If one page is shown, then scrape the jobs, click "show next," and repeat until "Show next" doesn't exist.
-    button_tag: str variable to identify the tag out button is contained in
-    button_tag_attr_val: str variable with the show more/next button's unique id
-
-    I think I should rework set_jobs_by_class such that it is actually just a selection with inner loops to handle the loads_by_pages cases. Each of those
-    selection paths would run a new method, scrape_titles, as appropriate. scrape_titles will be the existing logic of set_jobs_by_class.
-    Further, I should 
-
-    See __set_current_jobs_by_class (before reworking old logic into __scrape_titles). Figure out how to flexibly choose a kwarg_ that matches __title_class_by_selector.
-
-    I need a company that has discrete pages of jobs ("show next") to test that functionality.
-
-    If this works, then I need to make the by.selector and attribute value for the "show more/next" button flexible because it's currently hard-coded for writing purposes.
-'''
