@@ -1,12 +1,9 @@
 # <div align="center">Job Scraper</div>
 
-Note that the _setup.sh file has not yet been perfected. Sometimes it works, and sometimes some dependencies are missed. A sequential, manual execution of all commands in _setup.sh is recommended for the time being.
-
 MAIN WORK OUTSTANDING:
-* Fix _setup.sh so that it always functions completely and perfectly. The issue has not yet been identified.
-    * Omit this thought if this doesn't happen again before I finish everything, but I may want to make a note about force-quitting the app if it begins printing "y" to the terminal in an infinite loop.
-    * If I can't figure out how to make setup flawless every time (which I will), then I need a note about potential errors.
-    * Note about having mirror groups for NA, SA, and Europe? Recommend reordering them based on location?
+* The .json for the second company analyzed contained both the titles available at the first company and the second company.
+* The script might break when a targeted company removes all listings, but I'm not sure exactly how that will happen. I need to figure out which error this would return, or otherwise what unique feature may be of use in identifying this case. If I can handle the error when the scraper returns nothing, then the `__current_jobs` list should remain empty and I can write logic for that special case in main()/desktop_scraper(). The `Titles` section of the company .json would be empty.
+    * I'll try to account for this later by attempting to target either empty or non-existent tag/attribute pairs.
 * Finishing the README:
     * I need to add a screen recording of the app working when it's all running in the final implementation so that potential employers don't need to bother with trying to isntall. Use the "updates detected" notifications to show full functionality.
         * ***Start preparing for this 15 minutes beforehand so I get it in one go.***
@@ -26,11 +23,12 @@ MAIN WORK OUTSTANDING:
             * Send the manual script execution command.
                 * OPEN NOTIFICATIONS BEFORE IT FINISHES.
             * Watch per-execution notification come in.
+            * Expand any notification and dismiss it.
             * Expand the daily notification and click on it.
                 * Capture the launch of the company site.
             * Stop recording.
-    * For the match-case in `CompanyJobsFinder.set_current_jobs()`, I will eventually need to figure out which kwarg works for each selector. I've only verified this for `class name` so far.
-    * FOR THE LOVE OF GOD, SET THE PROJECT VERSION BEFORE YOU RELEASE IT AGAIN.
+* FOR THE LOVE OF GOD, SET THE PROJECT VERSION BEFORE YOU RELEASE IT AGAIN.
+* ALSO FOR THE LOVE OF GOD, REMEMBER TO TURN OFF FAST NOTIFICATIONS IN THE PYTHON SCRIPT BEFORE PUBLISHING THE FIRST STABLE RELEASE.
 *****
 *****
 *****
@@ -45,20 +43,20 @@ This application alerts users of updates to a specified company's (or companies'
 * One daily notification per company is scheduled for 1000 each day with a summary of yesterday's findings.
 * When changes to a given company's "Careers" page are detected, all subsequent executions for that day send a notification to the user's phone to increase visibility.
 * The scraper is periodically scheduled as a cronjob, so the frequency can be easily changed.
+* The scraper captures all job listings by navigating through "Careers" sections with multiple pages using Selenium.
 * Note that the application currently only checks for *updates* to company listings, so a listing removal will trigger the "listings updated" notification.
-* Navigates through "Careers" sections with multiple pages using Selenium.
 
 ### Planned:
-I am currently only targeting smaller companies with a relatively small number of job listings that fit on one webpage. The following planned features will allow me to target larger companies which may have a vast number of listings that are unrelated to me.
-* Detect only the addition of new jobs.
+The application is currently only configured to target smaller companies with a relatively small number of job listings. Some of the following planned features will allow for targeting larger companies which may have a vast number of listings that are unrelated to the user.
+* Detect only the addition of new jobs as opposed to detecting any change at all.
 * Filter job listings by specified keywords to narrow the search.
-    * As a result, notifications can meaningfully contain the actual job titles available for application.
-    * The drawback to this feature is that I may miss jobs that I am interested in if I do not use an expansive enough set of keyword filters. Even this won't gaurantee success.
+    * As a result, notifications could meaningfully contain the actual job titles available for application.
+    * The drawback to this feature is that I may miss jobs that I am interested in if I do not use an expansive enough set of keyword filters. Even still, some interesting jobs may be missed.
     * The benefit to this feature is that I could target much larger companies that have a higher quantity of irrelevant listings.
 * I could conceivably condense all available listings at all tracked companies into one text file that is built daily and linked-to in the daily notification.
     * This would be useful if I am tracking so many companies that receiving one notification per company is cumbersome. However, it is not the most pragmatic feature to work on right now.
-* I know that the script might break when a targeted company removes all listings, but I'm not sure exactly how that will happen. I need to figure out which error this would return, or otherwise what unique feature may be of use in identifying this case. If I can handle the error when the scraper returns nothing, then I can program the script to set 'Titles' to an empty list.
-    * I'll try to account for this later by attempting to target either empty or non-existent tag/attribute pairs.
+* For the match-case statement in `CompanyJobsFinder.set_current_jobs()`, I will eventually need to figure out which kwarg works for each selector. I've only verified this for `'class name'` so far.
+    * I will do this on an as-needed basis and I expect that anybody with the ability to use this script for their own purpose could do the same.
 
 ## How to Use
 
@@ -118,11 +116,27 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
     * The extracted project folder MUST be in `/data/data/com.termux/files/home/` to run.
 7. Run `chmod 700 -R Job-Scraper-<version number>` to set permissions.
 8. Run `./Job-Scraper-<version number>/src/scripts/_setup.sh` to configure Termux to run the job scraper.
-9. When setup finishes, COMPLETELY exit Termux. To do so, use the `Exit` option in the Termux persistent notification.
+9. When prompted, select a mirror group by using the arrow keys to navigate, `space` to select, and `enter` to save the selection.
+
+    <img src="./docs/images/termux-select-mirror-group.jpg" alt='The first screen presents the option to select a mirror group. Move the asterisk to the line that says "mirror group."' width="200" height="200"/>
+    <img src="./docs/images/termux-example-of-mirror-group.jpg" alt='The first screen presents the option to select a mirror group. Move the asterisk to the line that says "mirror group."' width="200" height="200"/>
+
+    * It is necessary to choose a mirror because the Termux host server is no longer maintained.
+    * A mirror *group* may not always be available for selection. In that case, choose an individual mirror.
+
+        <img src="./docs/images/termux-select-single-mirror.jpg" alt='The first screen presents the option to select a mirror group. Move the asterisk to the line that says "mirror group."' width="200" height="200"/>
+        <img src="./docs/images/termux-example-of-single-mirror.jpg" alt='The first screen presents the option to select a mirror group. Move the asterisk to the line that says "mirror group."' width="200" height="200"/>
+
+    * In the unlikely event that the installation fails, run `./Job-Scraper-<version number>/src/scripts/_setup.sh` again and try selecting a different mirror group. It may take several attempts.
+    * Mirrors are only required when installing/updating packages and dependencies. In the event that a connected mirror goes down, execute `termux-change-repo` from the command line to select a new mirror.
+10. When prompted, choose whether to grant Termux access to device storage.
+    * This step is optional for this project, but it facilitates command line access of the files in device storage.
+    * To set up Termux storage access at a alter time, execute `termux-setup-storage` from the command line. **You must completely exit Termux after executing this command.**
+11. When setup finishes, COMPLETELY exit Termux. To do so, use the `Exit` option in the Termux persistent notification.
 
     <img src="./docs/images/termux-exit.jpg" alt="Termux 'Exit' option shown in the persisten notification." width="200"/>
 
-10. Setup is complete once Termux has been completely exited.
+12. Setup is complete once Termux has been completely exited.
 
 ### Operation:
 **Notes:** If for any reason a file is moved out and back in to the parent directory on the mobile device, you will need to reset permissions for that file. `chmod 700 -R <parent_directory>` will set permissions for all files/directories when run from the home directory.
