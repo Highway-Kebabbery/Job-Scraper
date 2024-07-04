@@ -443,9 +443,9 @@ def main():
 
     # Begin execution
     this_execution = ThisExecution(
-        project_version='0.4.3',
+        project_version='0.4.4',
         mobile=True,
-        fast_notifications=False
+        fast_notifications=True
         )
     execution_logger = LogExecution(
         len(companies),
@@ -547,8 +547,8 @@ def desktop_scraper():
         print(company_object.current_jobs)       
 
 if __name__ == '__main__':
-    #main()
-    desktop_scraper()    # Used to test the web-scraper in isolation on Windows when trying to scrape new companies.
+    main()
+    #desktop_scraper()    # Used to test the web-scraper in isolation on Windows when trying to scrape new companies.
 
 """
 Notes for future work:
