@@ -62,33 +62,6 @@ class ThisExecution():
 class CompanyJobsFinder():
     """A class for finding and storing job listings available at a company."""
 
-    # Scraping and job comparison
-    __gecko_driver_path = ''
-    __driver = None
-    __company_name = ''
-    __url = ''
-    __job_title_tag = ''
-    __job_title_tag_attr_val = ''
-    __company_data_filepath = ''
-    __current_jobs = []
-    __previous_jobs = []
-    __title_class_by_selector = None
-    __loads_by_page = bool()
-    __show_more_button_text = ''
-
-    # Notification content
-    __new_jobs_today_msg_title = ''
-    __new_jobs_yesterday_msg_title = ''
-    __no_jobs_yesterday_msg_title = ''
-    __notification_command = ''
-    __fast_notifications = bool()
-
-    # filepaths
-    __wd = ''
-    __project_version = ''
-    __no_job_jpg_filepath = ''
-    __job_jpg_filepath = ''
-    __notification_script_filepath = ''
     __bash_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
 
     def __init__(self, company_name, url, job_title_tag, class_by_selector, job_title_tag_attr_val, loads_by_page, show_more_button_text, wd, project_version, mobile, fast_notifications):
@@ -97,6 +70,8 @@ class CompanyJobsFinder():
         self.__url = url
         self.__job_title_tag = job_title_tag
         self.__job_title_tag_attr_val = job_title_tag_attr_val
+        self.__current_jobs = []
+        self.__previous_jobs = []
         self.__loads_by_page = loads_by_page
         self.__show_more_button_text = show_more_button_text
         
