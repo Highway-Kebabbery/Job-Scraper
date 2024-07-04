@@ -29,7 +29,6 @@ MAIN WORK OUTSTANDING:
             * Expand the daily notification and click on it.
                 * Capture the launch of the company site.
             * Stop recording.
-    * Need to test companies that have scroll-through job pages that only show some of the total available listings.
     * For the match-case in `CompanyJobsFinder.set_current_jobs()`, I will eventually need to figure out which kwarg works for each selector. I've only verified this for `class name` so far.
     * FOR THE LOVE OF GOD, SET THE PROJECT VERSION BEFORE YOU RELEASE IT AGAIN.
 *****
