@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
 # I'm leaving this code beacuse you can manually set up specific mirrors if you like. It's not always possible to choose a mirror *group* when setting up.
+# It is, however, better to run `termux-change-repo` because that should give active mirrors.
 #setup_mirrors() {
 #    local repo_file="$PREFIX/etc/apt/sources.list"
 #    echo -e "\n\n\nSetting up mirrors...\n\n\n"
@@ -27,7 +28,7 @@
 echo -e "\n\n\nStarting initial configuration...\n\n\n"
 yes | pkg update -y || { echo -e "\n\n\nFailed to update packages.\n\n\n"; exit 1; }
 yes | pkg upgrade -y || { echo -e "\n\n\nFailed to upgrade packages.\n\n\n"; exit 1; }
-#setup_mirrors
+#setup_mirrors    # See comment above function definition for explanation of dead code.
 termux-change-repo || { echo -e "\n\n\nFailed to change repo.\n\n\n"; exit 1; }
 echo -e "\n\n\nCompleted initial configuration.\n\n\n"
 
