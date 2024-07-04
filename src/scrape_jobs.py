@@ -430,8 +430,9 @@ def main():
     ]
     '''
     jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', True, 'class name', 'styles--3TJHk', False, 'text()="Show more"']
-    resilience = ['Resilience', 'https://resilience.wd1.myworkdayjobs.com/Resilience_Careers', 'a', False, 'class name', 'css-19uc56f', True, 'contains(@aria-label, "next")']
-    companies = [jagex, resilience]
+    # resilience = ['Resilience', 'https://resilience.wd1.myworkdayjobs.com/Resilience_Careers', 'a', False, 'class name', 'css-19uc56f', True, 'contains(@aria-label, "next")']    # Added simply to test a site that loads jobs by page, but kept because it's fun to keep tabs on old employers.
+    admiral = ['Admiral', 'https://jobs.ashbyhq.com/admiral?embed=js', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook']  # Unable to fill out more/next button info as it wasn't present when the copany was tested.
+    companies = [jagex, admiral]
 
     # Validate that no two companies 'n' have the same name in companies[n][0].
     company_names = [company[0] for company in companies]
@@ -521,7 +522,7 @@ def desktop_scraper():
         'show_more/next_button_identifier' (Identifier for finding show more/next button by xpath. e.g. enter 'text()="Show more"' to get a final xpath of '//button[text()="Show more"]'. Another example would be 'contains(@aria-label, "next")'.
     ]
     '''
-    new_company = ['Resilience', 'https://resilience.wd1.myworkdayjobs.com/Resilience_Careers', 'a', False, 'class name', 'css-19uc56f', True, 'contains(@aria-label, "next")']
+    new_company = ['Admiral', 'https://jobs.ashbyhq.com/admiral?embed=js', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook']  # Unable to fill out more/next button info as it wasn't present when the copany was tested.
     companies = [new_company]
 
     # Begin execution
