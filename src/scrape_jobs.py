@@ -545,8 +545,8 @@ def desktop_scraper():
         print(company_object.current_jobs)       
 
 if __name__ == '__main__':
-    #main()
-    desktop_scraper()    # Used to test the web-scraper in isolation on Windows when trying to scrape new companies.
+    main()
+    #desktop_scraper()    # Used to test the web-scraper in isolation on Windows when trying to scrape new companies.
 
 """
 Notes for future work:
