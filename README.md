@@ -211,6 +211,7 @@ Through this project, I:
 **HTML**
 Through this project, I learned:
 * How to use an xpath to identify an element on a web page.
+* Learned to identify when a web page is embedded within another web page, as well as how to find and scrape the embedded webpage (because I can't scrape the host web page).
 
 **Debugging:**
 
