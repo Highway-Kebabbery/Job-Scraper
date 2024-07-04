@@ -30,7 +30,6 @@ MAIN WORK OUTSTANDING:
             * Stop recording.
     * Note about having mirror groups for NA, SA, and Europe? Recommend reordering them based on location?
     * FOR THE LOVE OF GOD, SET THE PROJECT VERSION BEFORE YOU RELEASE IT AGAIN.
-    * Jagex added enough jobs that there's now a "View More" button, so I should try to write the Selenium method to handle these instances while I have a chance.
 *****
 *****
 *****
@@ -46,6 +45,7 @@ This application alerts users of updates to a specified company's (or companies'
 * When changes to a given company's "Careers" page are detected, all subsequent executions for that day send a notification to the user's phone to increase visibility.
 * The scraper is periodically scheduled as a cronjob, so the frequency can be easily changed.
 * Note that the application currently only checks for *updates* to company listings, so a listing removal will trigger the "listings updated" notification.
+* Navigates through "Careers" sections with multiple pages using Selenium.
 
 ### Planned:
 I am currently only targeting smaller companies with a relatively small number of job listings that fit on one webpage. The following planned features will allow me to target larger companies which may have a vast number of listings that are unrelated to me and spread across multiple pages requiring the use of, *e.g.*, a "Next" button to navigate through.
@@ -54,9 +54,6 @@ I am currently only targeting smaller companies with a relatively small number o
     * As a result, notifications can meaningfully contain the actual job titles available for application.
     * The drawback to this feature is that I may miss jobs that I am interested in if I do not use an expansive enough set of keyword filters. Even this won't gaurantee success.
     * The benefit to this feature is that I could target much larger companies that have a higher quantity of irrelevant listings.
-* Navigate through "Careers" sections with multiple pages using Selenium.
-    * This will likely require implementation on a per-company basis, much as the scraper currently requires unique information to identify the job listing titles.
-    * This will probably be implemented as its own method in the CompanyJobsFinder class.
 * I could conceivably condense all available listings at all tracked companies into one text file that is built daily and linked-to in the daily notification.
     * This would be useful if I am tracking so many companies that receiving one notification per company is cumbersome. However, it is not the most pragmatic feature to work on right now.
 * I know that the script might break when a targeted company removes all listings, but I'm not sure exactly how that will happen. I need to figure out which error this would return, or otherwise what unique feature may be of use in identifying this case. If I can handle the error when the scraper returns nothing, then I can program the script to set 'Titles' to an empty list.
@@ -153,7 +150,7 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
 3. Changing execution frequency:
     * Either edit Schedule_Job_Scraper.sh or run `crontab -e` in Termux to edit the cronjob.
 4. Intermittent failure:
-    * Termux will occasionalyl be affected by background processes of the Android device. The main clue that execution has stopped is the failure of a daily notification to appear for each tracked company at 1000.
+    * Termux will occasionally be affected by background processes of the Android device. The main clue that execution has stopped is the failure of a daily notification to appear for each tracked company at 1000.
     * To resume execution: open Termux, run `crontab -e`, make and save a minor edit to a cronjob, then run `crontab -e` again and set the altered cronjob back to its original setting.
         * There may be other ways to resume execution, but this has worked for me.
 
