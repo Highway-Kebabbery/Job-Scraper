@@ -206,7 +206,12 @@ Through this project, I:
     * I learned how to use Beautiful Soup to parse html.
 * Practiced using Python to build, store, and clean up temporary shell scripts for use outside the main program.
 * Learned that os.popen('pwd').read() adds a newline character to the end of the response.
-    
+* Learned how to insert JavaScript snippets into my Python script in Selenium.
+
+**HTML**
+Through this project, I learned:
+* How to use an xpath to identify an element on a web page.
+
 **Debugging:**
 
 Through this project, I:
