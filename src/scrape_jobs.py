@@ -131,10 +131,10 @@ class CompanyJobsFinder():
                 pass
         except FileNotFoundError:
             if self.__fast_notifications == False:
-                self.__previous_jobs = {'Titles': [], "date_json_mod": str(datetime.now()), "update_detected": True}
+                self.__previous_jobs = {'Titles': [], "date_json_mod": str(datetime.now()), "new_job_detected": True}
             else:
                 # For testing the daily notification. Setting the date to yesterday upon file creation creates conditions to prepare the daily notification script immediately.
-                self.__previous_jobs = {'Titles': [], "date_json_mod": str(datetime.now() - timedelta(days=1)), "update_detected": True}
+                self.__previous_jobs = {'Titles': [], "date_json_mod": str(datetime.now() - timedelta(days=1)), "new_job_detected": True}
         else:
             with open(self.__company_data_filepath, 'r') as file:
                 self.__previous_jobs = json.load(file)
@@ -228,13 +228,13 @@ class CompanyJobsFinder():
     
         self.__driver.quit()
 
-    def dump_current_jobs_json(self, update_detected):
+    def dump_current_jobs_json(self, new_job_detected):
         """This method saves the current job listings to a .json file for comparison to the old job listings.
 
         Args:
-            update_detected (bool): Used tomorrow to store whether jobs were found today.
+            new_job_detected (bool): Used tomorrow to store whether jobs were found today.
         """
-        json_formatted_data = {'Titles':self.__current_jobs, 'date_json_mod':datetime.now(), 'update_detected':update_detected}
+        json_formatted_data = {'Titles':self.__current_jobs, 'date_json_mod':datetime.now(), 'new_job_detected':new_job_detected}
 
         def write_json():
             with open(self.__company_data_filepath, 'w') as file:
@@ -259,7 +259,7 @@ class CompanyJobsFinder():
         """
         # Choose content of the notification
         if daily_reminder == True:
-            if self.__previous_jobs['update_detected'] == False:    # Most likely message to occur
+            if self.__previous_jobs['new_job_detected'] == False:    # Most likely message to occur
                 self.__notification_command = f'termux-notification --title "{self.__no_jobs_yesterday_msg_title}" --content "Keep eating ramen noodles." --id big_unemployed-daily-{self.__company_name} --image-path {self.__no_job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_unemployed-daily-{self.__company_name}" '
             else:
                 self.__notification_command = f'termux-notification --title "{self.__new_jobs_yesterday_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-daily-{self.__company_name} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-daily-{self.__company_name}" '
@@ -412,7 +412,7 @@ def main():
         this_execution.project_version
         )
     execution_logger.log_timestamp(start=True)
-    update_detected = False
+    new_job_detected = False
 
     for company in companies:
         company_object = CompanyJobsFinder(
@@ -431,21 +431,23 @@ def main():
         # Compare current jobs to last execution's findings
         company_object.set_previous_jobs()
         company_object.set_current_jobs(child=company[3])
-        if company_object.previous_jobs['Titles'] != company_object.current_jobs:
-            update_detected = True
-            company_object.dump_current_jobs_json(update_detected)
-        
+        if company_object.current_jobs:    # Don't evaluate the newness of jobs if none exist
+            for job in company_object.current_jobs:
+                if job not in company_object.previous_jobs['Titles']:
+                    new_job_detected = True
+                    company_object.dump_current_jobs_json(new_job_detected)
+            
         # Send notifications
         if datetime.strptime(company_object.previous_jobs['date_json_mod'], '%Y-%m-%d %H:%M:%S.%f').date() != date.today():
             # First execution of the day prepares the daily notification.
-            if company_object.previous_jobs['update_detected'] == False:
+            if company_object.previous_jobs['new_job_detected'] == False:
                 company_object.send_notification(daily_reminder=True)
             else:
                 company_object.send_notification(daily_reminder=True)
-                company_object.dump_current_jobs_json(update_detected)
+                company_object.dump_current_jobs_json(new_job_detected)
         else:
             # Subsequent executions only notify is a job was found either on the current execution or earlier in the same day.
-            if company_object.previous_jobs['update_detected'] == True:
+            if company_object.previous_jobs['new_job_detected'] == True:
                 company_object.send_notification()  # Index number is appended to --id attribute in termux-notification which generates a unique notification id per company so notifications don't overwrite each other.
 
     # Log execution finish
