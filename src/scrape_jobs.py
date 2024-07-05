@@ -194,12 +194,12 @@ class CompanyJobsFinder():
 
             if child == False:
                 for job_title_tag in tags:
-                    self.__current_jobs.append(job_title_tag.string)
+                    self.__current_jobs.append(job_title_tag.string.replace('\u200b', '').replace('\u2013', '-').strip())    # .replace() from pandas can replace multiple characters in one call, but I'm not installing an entire dependency for this.
             else:
                 # Pull the string from the child of each uniquely identifiable parent tag.
                 # Only works if there's only one child.
                 for parent_tag in tags:
-                    self.__current_jobs.append(parent_tag.find().string)
+                    self.__current_jobs.append(parent_tag.find().string.replace('\u200b', '').replace('\u2013', '-').strip())
         
         def click_button():
             try:
@@ -384,9 +384,15 @@ def main():
     ]
     '''
     jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', True, 'class name', 'styles--3TJHk', False, 'text()="Show more"']
+    # feathr = ['Feathr', 'https://jobs.ashbyhq.com/feathr', '', , '', '', ,'']    # PRIMARY TARGET. I'M COMING FOR YOU; I ALWAYS WIN.
     # resilience = ['Resilience', 'https://resilience.wd1.myworkdayjobs.com/Resilience_Careers', 'a', False, 'class name', 'css-19uc56f', True, 'contains(@aria-label, "next")']    # Added simply to test a site that loads jobs by page, but kept because it's fun to keep tabs on old employers.
-    admiral = ['Admiral', 'https://jobs.ashbyhq.com/admiral?embed=js', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook']  # Unable to fill out more/next button info as it wasn't present when the copany was tested.
-    companies = [jagex, admiral]
+    admiral = ['Admiral', 'https://jobs.ashbyhq.com/admiral?embed=js', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook']    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
+    infotech = ['Infotech', 'https://recruiting.ultipro.com/INF1010INFT/JobBoard/a1f626ce-9a88-4c30-86ee-6562ee8ea030/?q=&o=postedDateDesc', 'a', False, 'class name', 'opportunity-link', False, 'NonsenseGobbledygook']  # Unable to fill out more/next button info as it wasn't present when the copany was tested.
+    # mobiquity = ['Mobiquity', 'https://www.mobiquity.com/careers/americas/', '', , '', '', , '']    # Has a Gainesville office. I'd need to implement a way to filter by sibling elements before deciding to pull a job title because they have a lot of global positions. I can't guess how to filter for American jobs given there are none available right now. Worth checking on manually?
+    # byppo = ['Byppo', 'https://www.byppo.com/byppo-careers-page', '', , '', '', , '']    # Local, but has no listings available and so I don't know what to scrape for.
+    # opie = ['OPIE Software', 'https://www.opiesoftware.com/careers', '', , '', '', , '']    # Local company. No positions open, not sure how to scrape.
+    golok = ['Golok', 'https://golokglobal.com/jobs/', 'h2', False, 'class name', 'awsm-job-post-title', False, 'NonsenseGobbledygook']    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
+    companies = [jagex, admiral, infotech, golok]
 
     # Validate that no two companies 'n' have the same name in companies[n][0].
     company_names = [company[0] for company in companies]
@@ -398,7 +404,7 @@ def main():
     # Begin execution
     this_execution = ThisExecution(
         project_version='0.4.4',
-        fast_notifications=True
+        fast_notifications=False
         )
     execution_logger = LogExecution(
         len(companies),
@@ -474,7 +480,7 @@ def desktop_scraper():
         'show_more/next_button_identifier' (Identifier for finding show more/next button by xpath. e.g. enter 'text()="Show more"' to get a final xpath of '//button[text()="Show more"]'. Another example would be 'contains(@aria-label, "next")'.
     ]
     '''
-    new_company = ['Admiral', 'https://jobs.ashbyhq.com/admiral?embed=js', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook']  # Unable to fill out more/next button info as it wasn't present when the copany was tested.
+    new_company = ['Golok', 'https://golokglobal.com/jobs/', 'h2', False, 'class name', 'awsm-job-post-title', False, 'NonsenseGobbledygook']
     companies = [new_company]
 
     # Begin execution
@@ -498,8 +504,8 @@ def desktop_scraper():
         print(company_object.current_jobs)       
 
 if __name__ == '__main__':
-    #main()
-    desktop_scraper()    # Used to test the web-scraper in isolation on Windows when trying to scrape new companies.
+    main()
+    #desktop_scraper()    # Used to test the web-scraper in isolation on Windows when trying to scrape new companies.
 
 """
 Notes for future work:
