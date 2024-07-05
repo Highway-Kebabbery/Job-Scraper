@@ -403,7 +403,7 @@ def main():
 
     # Begin execution
     this_execution = ThisExecution(
-        project_version='0.4.4',
+        project_version='0.4.5',
         fast_notifications=False
         )
     execution_logger = LogExecution(
@@ -436,6 +436,7 @@ def main():
                 if job not in company_object.previous_jobs['Titles']:
                     new_job_detected = True
                     company_object.dump_current_jobs_json(new_job_detected)
+                    break
             
         # Send notifications
         if datetime.strptime(company_object.previous_jobs['date_json_mod'], '%Y-%m-%d %H:%M:%S.%f').date() != date.today():
