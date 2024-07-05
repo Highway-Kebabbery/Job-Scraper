@@ -1,37 +1,5 @@
 # <div align="center">Job Scraper</div>
 
-MAIN WORK OUTSTANDING:
-* Finishing the README:
-    * I need to add a screen recording of the app working when it's all running in the final implementation so that potential employers don't need to bother with trying to isntall. Use the "updates detected" notifications to show full functionality.
-        * ***Start preparing for this 15 minutes beforehand so I get it in one go.***
-            * Open Termux. Type in the command to run scrape_jobs.py manually. DO NOT SEND.
-            * Navigate to the home screen.
-            * Locate screen recording function and try it once to make sure I know what to expect.
-            * Open Google Chrome to a new tab (so there's no possibility of personal info being displayed).
-            * Open Clock > World Clock to see what the current time is to the second.
-            * Go to the "all apps" screen and close everything but Termux, Chrome, and Clock (for privacy).
-                * Make sure the apps suggested on the bottom are not incriminating (not that I have anything that's actually incriminating).
-            * CLEAR ALL NOTIFICATIONS CONTAINING PERSONAL DATA.
-            * Begin recording 60 seconds before the daily notification arrives.
-                * Can record the clock screen to avoid showing personal data.
-            * After notification arrives, pull down notifications to display it and expand it.
-                * DO NOT CLICK IT ON ACCIDENT.
-            * Without clearning notification, nav to Termux.
-            * Send the manual script execution command.
-                * OPEN NOTIFICATIONS BEFORE IT FINISHES.
-            * Watch per-execution notification come in.
-            * Expand any notification and dismiss it.
-            * Expand the daily notification and click on it.
-                * Capture the launch of the company site.
-            * Stop recording.
-* FOR THE LOVE OF GOD, SET THE PROJECT VERSION BEFORE YOU RELEASE IT AGAIN.
-* ALSO FOR THE LOVE OF GOD, REMEMBER TO TURN OFF FAST NOTIFICATIONS IN THE PYTHON SCRIPT BEFORE PUBLISHING THE FIRST STABLE RELEASE.
-*****
-*****
-*****
-*****
-*****
-
 ## Description
 This application alerts users of updates to a specified company's (or companies') "Careers" page via notifications on their Android phone. This is acheived by using Termux, Selenium, and Beautiful Soup on an Android phone to scrape web content, by using `cronie` to schedule Python script execution in Termux, and by using the `at` service to schedule single-occurrence events such as sending notifications to the user's phone. **Note:** This application does **not** require rooting of the Android phone.
 
@@ -161,9 +129,13 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
 3. Changing execution frequency:
     * Either edit Schedule_Job_Scraper.sh or run `crontab -e` in Termux to edit the cronjob.
 4. Intermittent failure:
-    * Termux will occasionally be affected by background processes of the Android device. The main clue that execution has stopped is the failure of a daily notification to appear for each tracked company at 1000.
+    * Termux will occasionally be affected by background processes of the Android device or other apps that take various levels of control over the device. The main clue that execution has stopped is the failure of a daily notification to appear for each tracked company at 1000.
     * To resume execution: open Termux, run `crontab -e`, make and save a minor edit to a cronjob, then run `crontab -e` again and set the altered cronjob back to its original setting.
         * There may be other ways to resume execution, but this has worked for me.
+
+### Demonstration
+
+<img src="./docs/videos/demonstration-of-functionality.gif" width="200" height="433"/>
 
 
 ## Technology
