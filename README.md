@@ -1,7 +1,8 @@
 # <div align="center">Job Scraper</div>
 
 ## Description
-This application alerts users of updates to a specified company's (or companies') "Careers" page via notifications on their Android phone. This is acheived by using Termux, Selenium, and Beautiful Soup on an Android phone to scrape web content, by using `cronie` to schedule Python script execution in Termux, and by using the `at` service to schedule single-occurrence events such as sending notifications to the user's phone. **Note:** This application does **not** require rooting of the Android phone.
+This application alerts users of updates to a specified company's (or companies') "Careers" page via notifications on their Android phone. This is acheived by using Termux, Selenium, and Beautiful Soup on an Android phone to scrape web content, by using `cronie` to schedule Python script execution in Termux, and by using the `at` service to schedule single-occurrence events such as sending notifications to the user's phone. 
+**Note:** This application does **not** require rooting of the Android phone.
 
 ## Features
 ### Current:
@@ -10,6 +11,7 @@ This application alerts users of updates to a specified company's (or companies'
 * When a new job is added to a given company's "Careers" page, all subsequent executions for that day send a notification to the user's phone to increase visibility.
 * The scraper is periodically scheduled as a cronjob, so the frequency can be easily changed.
 * The scraper captures all job listings by navigating through "Careers" sections with multiple pages using Selenium.
+* Notifications are linked to each company's "Careers" page, but the job titles for each company can also be easily found in the company .json files.
 
 ### Planned:
 The application is currently only configured to target smaller companies with a relatively small number of job listings. Some of the following planned features will allow for targeting larger companies which may have a vast number of listings that are unrelated to the user.
@@ -17,8 +19,6 @@ The application is currently only configured to target smaller companies with a 
     * As a result, notifications could meaningfully contain the actual job titles available for application.
     * The drawback to this feature is that I may miss jobs that I am interested in if I do not use an expansive enough set of keyword filters. Even still, some interesting jobs may be missed.
     * The benefit to this feature is that I could target much larger companies that have a higher quantity of irrelevant listings.
-* I could conceivably condense all available listings at all tracked companies into one text file that is built daily and linked-to in the daily notification.
-    * This would be useful if I am tracking so many companies that receiving one notification per company is cumbersome. However, it is not the most pragmatic feature to work on right now.
 * For the match-case statement in `CompanyJobsFinder.set_current_jobs()`, I will eventually need to figure out which kwarg works for each selector. I've only verified this for `'class name'` so far.
     * I will do this on an as-needed basis and I expect that anybody with the ability to use this script for their own purpose could do the same.
 
