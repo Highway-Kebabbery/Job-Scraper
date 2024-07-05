@@ -2,6 +2,7 @@
 
 ## Description
 This application alerts users of updates to a specified company's (or companies') "Careers" page via notifications on their Android phone. This is acheived by using Termux, Selenium, and Beautiful Soup on an Android phone to scrape web content, by using `cronie` to schedule Python script execution in Termux, and by using the `at` service to schedule single-occurrence events such as sending notifications to the user's phone. 
+
 **Note:** This application does **not** require rooting of the Android phone.
 
 ## Features
