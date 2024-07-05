@@ -162,7 +162,8 @@ Given that I was already familiar with Python, many of the most challenging part
 
 I learned:
 * How to update the Termux source repository/mirrors.
-* How to configure the Termux environment to run Python, Selenium, and Beautiful Soup.* How to set permissions for files and directories.
+* How to configure the Termux environment to run Python, Selenium, and Beautiful Soup.
+* How to set permissions for files and directories.
 * How to make a script executable with a shebang.
 * How to configure the Termux environment to run cronjobs and `at` jobs (as well as how to use these features on Linux).
 * `cron`:
