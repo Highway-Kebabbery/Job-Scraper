@@ -37,15 +37,14 @@ This application alerts users of updates to a specified company's (or companies'
 
 ## Features
 ### Current:
+* Detects whether new jobs are added to a company's "Careers" page.
 * One daily notification per company is scheduled for 1000 each day with a summary of yesterday's findings.
-* When changes to a given company's "Careers" page are detected, all subsequent executions for that day send a notification to the user's phone to increase visibility.
+* When a new job is added to a given company's "Careers" page, all subsequent executions for that day send a notification to the user's phone to increase visibility.
 * The scraper is periodically scheduled as a cronjob, so the frequency can be easily changed.
 * The scraper captures all job listings by navigating through "Careers" sections with multiple pages using Selenium.
-* Note that the application currently only checks for *updates* to company listings, so a listing removal will trigger the "listings updated" notification.
 
 ### Planned:
 The application is currently only configured to target smaller companies with a relatively small number of job listings. Some of the following planned features will allow for targeting larger companies which may have a vast number of listings that are unrelated to the user.
-* Detect only the addition of new jobs as opposed to detecting any change at all.
 * Filter job listings by specified keywords to narrow the search.
     * As a result, notifications could meaningfully contain the actual job titles available for application.
     * The drawback to this feature is that I may miss jobs that I am interested in if I do not use an expansive enough set of keyword filters. Even still, some interesting jobs may be missed.
