@@ -2,11 +2,11 @@
 
 """
     Features:
-    main() builds company objects, scrapes current jobs, compares to previous jobs, and reports updates.
+    main() builds company objects, scrapes current jobs, compares to previous jobs, and reports the detection of new jobs.
         * Users receive one daily update notification:
-            * If an update was found yesterday, the daily notification informs the user.
-            * If no updates were found, the daily notification informs the user of their continued unemployment.
-        * In addition, when a listing update is detected, the user receives a per-execution notification on every subsequent run of the day to ensure visibility.
+            * If a new job was found yesterday, the daily notification informs the user.
+            * If no new jobs were found, the daily notification informs the user of their continued unemployment.
+        * In addition, when a new listing is detected, the user receives a per-execution notification on every subsequent run of the day to ensure visibility.
     
     desktop_scraper() is a version of main() that's been stripped down for Windows-64 systems. It is used to easily test which attributes work for scraping new commpany job pages.
         
@@ -91,8 +91,8 @@ class CompanyJobsFinder():
                 raise SystemExit
 
         # Configure notification parameters
-        self.__new_jobs_today_msg_title = f'Job listings updated today for {company_name}!'
-        self.__new_jobs_yesterday_msg_title = f'Job listings updated yesterday for {company_name}!'
+        self.__new_jobs_today_msg_title = f'New job found today at {company_name}!'
+        self.__new_jobs_yesterday_msg_title = f'New job found yesterday at {company_name}!'
         self.__no_jobs_yesterday_msg_title = f'No new jobs yesterday at {company_name}.'
         self.__fast_notifications = fast_notifications
 
@@ -118,7 +118,7 @@ class CompanyJobsFinder():
         """Getter for self.__previous_jobs
 
         Returns:
-            Dict: List of jobs as of the last search, time of last execution, whether an update has been detected today.
+            Dict: List of jobs as of the last search, time of last execution, whether a new job has been detected today.
         """
         return self.__previous_jobs
 
@@ -350,11 +350,11 @@ class LogExecution():
 def main():
     """
         Features:
-        main() builds company objects, scrapes current jobs, compares to previous jobs, and reports updates.
+        main() builds company objects, scrapes current jobs, compares to previous jobs, and reports the detection of new jobs.
             * Users receive one daily update notification:
-                * If an update was found yesterday, the daily notification informs the user.
-                * If no updates were found, the daily notification informs the user of their continued unemployment.
-            * In addition, when a listing update is detected, the user receives a per-execution notification on every subsequent run of the day to ensure visibility.
+                * If a new job was found yesterday, the daily notification informs the user.
+                * If no new jobs were found, the daily notification informs the user of their continued unemployment.
+            * In addition, when a new listing is detected, the user receives a per-execution notification on every subsequent run of the day to ensure visibility.
         
         desktop_scraper() is a version of main() that's been stripped down for Windows-64 systems. It is used to easily test which attributes work for scraping new commpany job pages.
             
