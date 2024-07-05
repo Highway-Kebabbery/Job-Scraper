@@ -29,21 +29,15 @@ from selenium.webdriver.support import expected_conditions as EC
 class ThisExecution():
     """This class contains general data about the execution to be passed to other classes.
     """
-    project_version = ''
-    wd = ''
-    mobile = bool()
-    fast_notifications = bool()
 
-    def __init__(self, project_version=project_version, mobile=True, fast_notifications=False):
+    def __init__(self, project_version='', fast_notifications=False):
         """_summary_
 
         Args:
             project_version (string): Release version. Used to build exact filepaths.
-            mobile (bool, optional): Used to decide how to find the location of geckodriver, as this differs from Termux (mobile) to Windows. Defaults to True.
             fast_notifications (bool, optional): Used to send daily notifications one minute after generation for quick testing. Defaults to False.
         """
         self.project_version = project_version
-        self.mobile = mobile
         self.fast_notifications = fast_notifications
         self.__build_wd()
 
@@ -64,8 +58,7 @@ class CompanyJobsFinder():
 
     __bash_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
 
-    def __init__(self, company_name, url, job_title_tag, class_by_selector, job_title_tag_attr_val, loads_by_page, show_more_button_text, wd, project_version, mobile, fast_notifications):
-        self.__set_firefox_driver(mobile)
+    def __init__(self, company_name, url, job_title_tag, class_by_selector, job_title_tag_attr_val, loads_by_page, show_more_button_text, wd, project_version, fast_notifications):
         self.__company_name = company_name
         self.__url = url
         self.__job_title_tag = job_title_tag
@@ -106,28 +99,19 @@ class CompanyJobsFinder():
         # Build file paths
         self.__project_version = project_version
         self.__wd = wd
-        self.__gecko_driver_path = f'/{self.__wd}/src/drivers/win64/geckodriver.exe'
         self.__company_data_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/data/{self.__company_name}.json'
         self.__no_job_jpg_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/media/no_job.jpg'
         self.__job_jpg_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/media/job.jpg'
         self.__notification_script_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/scripts/daily_notify_{company_name}.sh'
-    
-    def __set_firefox_driver(self, mobile=True):
-        """Set up the web driver
+        
+        self.__set_firefox_driver()
 
-        Args:
-            mobile (bool, optional): I set the script/project up to run both on Win64 (for basic configuration) and on Linux
-            because the script is run through Termux on Android, which provides a Linux-based environment. When troubleshooting
-            on Win64, don't forget to add the <mobile=False> argument when called in __init__. Defaults to True.
-        """
+    def __set_firefox_driver(self):
+        """Set up the web driver"""
+
         options = webdriver.FirefoxOptions()
         options.add_argument("--headless")
-        if mobile == True:
-            # driver is in environment variables on Android and needs not be called.
-            self.__driver = webdriver.Firefox(options=options)
-        else:
-            service = FirefoxService(executable_path=self.__gecko_driver_path)
-            self.__driver = webdriver.Firefox(service=service, options=options)
+        self.__driver = webdriver.Firefox(options=options)
             
     @property
     def previous_jobs(self):
@@ -180,74 +164,69 @@ class CompanyJobsFinder():
         self.__driver.get(self.__url)
 
         # When the target element is present, scrape and parse html.
-        try:
-            WebDriverWait(self.__driver, 10).until(
-                EC.presence_of_element_located((self.__title_class_by_selector, self.__job_title_tag_attr_val))
-            )
-        except Exception as e:
-            # This is where I'll put logic to handle the event where all jobs have been removed and none are available.
-            # I can set logic in main()/desktop_scraper() to check whether current_jobs is empty, and if so I can just schedule the daily failure notification?
-            return []
-        else:
-            def scrape_job_titles():
-                html = self.__driver.page_source
-                soup = BeautifulSoup(html, 'html.parser')
+        WebDriverWait(self.__driver, 10).until(
+            EC.presence_of_element_located((self.__title_class_by_selector, self.__job_title_tag_attr_val))
+        )
+        
+        def scrape_job_titles():
+            html = self.__driver.page_source
+            soup = BeautifulSoup(html, 'html.parser')
 
-                # Locate job titles.
-                # Hey, so... I've only actually tested this on 'class name'. I don't actually know yet whether the other cases work until I get around to finding a bunch of instances in which I need them to work.
-                match self.__title_class_by_selector:
-                    case 'id':
-                        tags = soup.find_all(self.__job_title_tag, id=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
-                    case 'name':
-                        tags = soup.find_all(self.__job_title_tag, name=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
-                    case 'xpath':
-                        tags = soup.find_all(self.__job_title_tag, xpath=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
-                    case 'link text':
-                        pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
-                    case 'partial link text':
-                        pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
-                    case 'tag name':
-                        pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
-                    case 'class name':
-                        tags = soup.find_all(self.__job_title_tag, class_=self.__job_title_tag_attr_val)
-                    case 'css selector':
-                        pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
+            # Locate job titles.
+            # Hey, so... I've only actually tested this on 'class name'. I don't actually know yet whether the other cases work until I get around to finding a bunch of instances in which I need them to work.
+            match self.__title_class_by_selector:
+                case 'id':
+                    tags = soup.find_all(self.__job_title_tag, id=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
+                case 'name':
+                    tags = soup.find_all(self.__job_title_tag, name=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
+                case 'xpath':
+                    tags = soup.find_all(self.__job_title_tag, xpath=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
+                case 'link text':
+                    pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
+                case 'partial link text':
+                    pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
+                case 'tag name':
+                    pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
+                case 'class name':
+                    tags = soup.find_all(self.__job_title_tag, class_=self.__job_title_tag_attr_val)
+                case 'css selector':
+                    pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
 
-                if child == False:
-                    for job_title_tag in tags:
-                        self.__current_jobs.append(job_title_tag.string)
-                else:
-                    # Pull the string from the child of each uniquely identifiable parent tag.
-                    # Only works if there's only one child.
-                    for parent_tag in tags:
-                        self.__current_jobs.append(parent_tag.find().string)
-            
-            def click_button():
-                try:
-                    button = WebDriverWait(self.__driver, 5).until(
-                        EC.element_to_be_clickable((By.XPATH, f'//button[{self.__show_more_button_text}]'))
-                    )
-                    self.__driver.execute_script('arguments[0].scrollIntoView(true);', button)
-                    self.__driver.execute_script('arguments[0].click();', button)
-                    time.sleep(2)
-                    return True
-                except:
-                    return False
-            
-            if self.__loads_by_page:
-                # When jobs are shown one page at a time: scrape jobs, click next, and repeat until all pages are scraped
-                scrape_job_titles()
-                while True:
-                    if not click_button():
-                        break
-                    scrape_job_titles()
+            if child == False:
+                for job_title_tag in tags:
+                    self.__current_jobs.append(job_title_tag.string)
             else:
-                # If jobs are all shown on one page when a "show more" button is clicked, then click until it's gone and then scrape all jobs at once.
-                while click_button():
-                    pass
+                # Pull the string from the child of each uniquely identifiable parent tag.
+                # Only works if there's only one child.
+                for parent_tag in tags:
+                    self.__current_jobs.append(parent_tag.find().string)
+        
+        def click_button():
+            try:
+                button = WebDriverWait(self.__driver, 5).until(
+                    EC.element_to_be_clickable((By.XPATH, f'//button[{self.__show_more_button_text}]'))
+                )
+                self.__driver.execute_script('arguments[0].scrollIntoView(true);', button)
+                self.__driver.execute_script('arguments[0].click();', button)
+                time.sleep(2)
+                return True
+            except:
+                return False
+        
+        if self.__loads_by_page:
+            # When jobs are shown one page at a time: scrape jobs, click next, and repeat until all pages are scraped
+            scrape_job_titles()
+            while True:
+                if not click_button():
+                    break
                 scrape_job_titles()
-        finally:
-            self.__driver.quit()
+        else:
+            # If jobs are all shown on one page when a "show more" button is clicked, then click until it's gone and then scrape all jobs at once.
+            while click_button():
+                pass
+            scrape_job_titles()
+    
+        self.__driver.quit()
 
     def dump_current_jobs_json(self, update_detected):
         """This method saves the current job listings to a .json file for comparison to the old job listings.
@@ -419,7 +398,6 @@ def main():
     # Begin execution
     this_execution = ThisExecution(
         project_version='0.4.4',
-        mobile=True,
         fast_notifications=True
         )
     execution_logger = LogExecution(
@@ -441,7 +419,6 @@ def main():
             company[7],
             this_execution.wd,
             this_execution.project_version,
-            this_execution.mobile,
             this_execution.fast_notifications
             )
         
@@ -501,7 +478,7 @@ def desktop_scraper():
     companies = [new_company]
 
     # Begin execution
-    this_execution = ThisExecution(mobile=False)
+    this_execution = ThisExecution()
 
     for company in companies:
         company_object = CompanyJobsFinder(
@@ -514,7 +491,6 @@ def desktop_scraper():
             company[7],
             this_execution.wd,
             this_execution.project_version,
-            this_execution.mobile,
             this_execution.fast_notifications
             )
 
@@ -522,8 +498,8 @@ def desktop_scraper():
         print(company_object.current_jobs)       
 
 if __name__ == '__main__':
-    main()
-    #desktop_scraper()    # Used to test the web-scraper in isolation on Windows when trying to scrape new companies.
+    #main()
+    desktop_scraper()    # Used to test the web-scraper in isolation on Windows when trying to scrape new companies.
 
 """
 Notes for future work:
