@@ -22,7 +22,6 @@ from datetime import date, datetime, timedelta
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -151,12 +150,10 @@ class CompanyJobsFinder():
     
     def set_current_jobs(self, child=False):
         """This is the setter method for self.__current_jobs.
-        This method gets a webpage and scrapes it for jobs. It can either operate on
-        tags with unique identifiers, or the immediate child of a tag with a unique identifier.
+        This method gets a webpage and scrapes it for jobs. It can either operate on tags with unique identifiers or the immediate child of a tag with a unique identifier.
 
         Args:
-            child (bool, optional): Sets whether you're looking in the child of the
-            identifiable tag for the job information. Defaults to False.
+            child (bool, optional): Sets whether you're looking in the child of the identifiable tag for the job information. Defaults to False.
 
         Returns:
             List of strings: List of job titles currently available at the company.
@@ -191,13 +188,12 @@ class CompanyJobsFinder():
                     tags = soup.find_all(self.__job_title_tag, class_=self.__job_title_tag_attr_val)
                 case 'css selector':
                     pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
-
+            
             if child == False:
                 for job_title_tag in tags:
-                    self.__current_jobs.append(job_title_tag.string.replace('\u200b', '').replace('\u2013', '-').strip())    # .replace() from pandas can replace multiple characters in one call, but I'm not installing an entire dependency for this.
+                    self.__current_jobs.append(job_title_tag.string.replace('\u200b', '').replace('\u2013', '-').strip())    # I have seen horrors beyond comprehension.
             else:
-                # Pull the string from the child of each uniquely identifiable parent tag.
-                # Only works if there's only one child.
+                # Pull the string from the child of each uniquely identifiable parent tag. Only works if there's only one child.
                 for parent_tag in tags:
                     self.__current_jobs.append(parent_tag.find().string.replace('\u200b', '').replace('\u2013', '-').strip())
         
@@ -229,10 +225,10 @@ class CompanyJobsFinder():
         self.__driver.quit()
 
     def dump_current_jobs_json(self, new_job_detected):
-        """This method saves the current job listings to a .json file for comparison to the old job listings.
+        """This method saves the current job listings to a .json file for comparison to future job listings.
 
         Args:
-            new_job_detected (bool): Used tomorrow to store whether jobs were found today.
+            new_job_detected (bool): Used when building the daily notification during the first run of each day to determine whether jobs were detected the previous day.
         """
         json_formatted_data = {'Titles':self.__current_jobs, 'date_json_mod':datetime.now(), 'new_job_detected':new_job_detected}
 
@@ -243,7 +239,7 @@ class CompanyJobsFinder():
 
         try:
             with open(self.__company_data_filepath, 'r') as file:
-                pass
+                file.close()
         except FileNotFoundError:
             # The initial creation/writing to the .json has weird recursive effects in Termux. Writing to it twice fixes it... Windows functions as expected.
             for i in range(2):
@@ -298,14 +294,6 @@ class CompanyJobsFinder():
 class LogExecution():
     """A class to handle logging the execution of the program.
     """
-    __number_of_companies = int()
-    __wd = ''
-    __project_version = ''
-    __execution_log_filepath = ''
-    __start_time = None
-    __stop_time = None
-    __total_time = None
-    __time_per_company = float()
 
     def __init__(self, number_of_companies, wd, project_version):
         self.__number_of_companies = number_of_companies
@@ -333,7 +321,7 @@ class LogExecution():
         
         try:
             with open(self.__execution_log_filepath, 'r', newline='') as file:
-                pass
+                file.close()
         except FileNotFoundError:
             headers = ['Start Time', 'Stop Time', 'Total Time', 'Companies Analyzed', 'Average Time per Company']
             with open(self.__execution_log_filepath, 'w', newline='') as file:
@@ -364,6 +352,7 @@ def main():
             * Comment out the main() entry point and uncomment the desktop_scraper() entry point.
             * Follow the instructions in the desktop_scraper() docstring to test the scraper on new companies.
             * In main(), create and fill out a new company attributes list and then add that list's name to `companies`.
+            * Re-comment the desktop_scraper() entry point and uncomment the main() entry point after testing.
         * No two companies should have the same name in the first position of their attribute list.
         * Instantiating `this_execution`:
             * Always make sure the version number matches the release number you're using.
@@ -376,8 +365,8 @@ def main():
         'unique_company_name' (not used for any other company in the `companies` list),
         'careers_page_url' (the web page containing job listings),
         'html_tag_containing_job_title' (the tag or parent of the tag containing the job titles),
-        does_child_of_targeted_tag_contain_job_title_Boolean (sometimes job titles live inside indistinct tags that are children of uniquely targetable tags - is this the case, True or False?),
-        'name_of_attribute_used_for_job_title_tag_selection' (**NOTE**: THIS WILL FAIL IF YOU DON'T USE A VALID VALUE. NOT ALL OF THESE HAVE BEEN TESTED YET. The name of the attribute used to uniquely select job title tag (e.g. 'id', 'name', 'xpath', 'link text', 'partial link text', 'tag name', 'class name', 'css selector')),
+        does_child_of_targeted_tag_contain_job_title_Boolean (sometimes job titles live inside indistinct tags that are children of uniquely targetable tags - is this the case, True or False? Only works when the tag with the job title has no siblings.),
+        'name_of_attribute_used_for_job_title_tag_selection' (**NOTE**: THIS WILL FAIL IF YOU DON'T USE A VALID VALUE. NOT ALL OF THESE HAVE BEEN TESTED YET. The name of the attribute used to uniquely select job title tag. e.g. 'id', 'name', 'xpath', 'link text', 'partial link text', 'tag name', 'class name', 'css selector'),
         'unique_job_title_tag_attr_val' (a unique attribute for targeting job title tags),
         do_job_titles_load_by_individual_pages_Boolean (i.e. Is there a button like "show next" that loads one page at a time, only displaying some of the job titles (True), or is there a button like "show more" that, when clicked, displays all previously visible job titles **and** a new set of titles all at once after being clicked (False)?),
         'show_more/next_button_identifier' (Identifier for finding show more/next button by xpath. e.g. enter 'text()="Show more"' to get a final xpath of '//button[text()="Show more"]'. Another example would be 'contains(@aria-label, "next")'.)
@@ -398,13 +387,14 @@ def main():
     company_names = [company[0] for company in companies]
     counter = Counter(company_names)
     duplicate_names = [i for i, j in counter.items() if j > 1]
-    if duplicate_names == True:
+    if duplicate_names:
+        print('Error. Duplicate company name detected.')
         raise SystemExit
 
     # Begin execution
     this_execution = ThisExecution(
-        project_version='0.4.5',
-        fast_notifications=False
+        project_version='0.5.0',
+        fast_notifications=True
         )
     execution_logger = LogExecution(
         len(companies),
@@ -462,7 +452,7 @@ def desktop_scraper():
             * Check the company's robots.txt and respect their wishes.
             * Comment out the main() entry point and uncomment the desktop_scraper() entry point.
             * Excute the script from the parent project folder, otherwise the path will be built incorrectly.
-            * The script needs to be executed from the terminal; the VS Code debugger won't work.
+            * The script needs to be executed from the command line; the VS Code debugger won't work.
             * Inspect the company job listings webpage to lcoate the appropriate html tag and attribute value.
             * Fill out `new_company` with the relevant information.
             * Execute the script from the command line.
@@ -476,8 +466,8 @@ def desktop_scraper():
         'unique_company_name' (not used for any other company in the `companies` list),
         'careers_page_url' (the web page containing job listings),
         'html_tag_containing_job_title' (the tag or parent of the tag containing the job titles),
-        does_child_of_targeted_tag_contain_job_title_Boolean (sometimes job titles live inside indistinct tags that are children of uniquely targetable tags - is this the case, True or False?),
-        'name_of_attribute_used_for_job_title_tag_selection' (**NOTE**: THIS WILL FAIL IF YOU DON'T USE A VALID VALUE. NOT ALL OF THESE HAVE BEEN TESTED YET. The name of the attribute used to uniquely select job title tag (e.g. 'id', 'name', 'xpath', 'link text', 'partial link text', 'tag name', 'class name', 'css selector')),
+        does_child_of_targeted_tag_contain_job_title_Boolean (sometimes job titles live inside indistinct tags that are children of uniquely targetable tags - is this the case, True or False? Only works when the tag with the job title has no siblings.),
+        'name_of_attribute_used_for_job_title_tag_selection' (**NOTE**: THIS WILL FAIL IF YOU DON'T USE A VALID VALUE. NOT ALL OF THESE HAVE BEEN TESTED YET. The name of the attribute used to uniquely select job title tag. e.g. 'id', 'name', 'xpath', 'link text', 'partial link text', 'tag name', 'class name', 'css selector'),
         'unique_job_title_tag_attr_val' (a unique attribute for targeting job title tags),
         do_job_titles_load_by_individual_pages_Boolean (i.e. Is there a button like "show next" that loads one page at a time, only displaying some of the job titles (True), or is there a button like "show more" that, when clicked, displays all previously visible job titles **and** a new set of titles all at once after being clicked (False)?),
         'show_more/next_button_identifier' (Identifier for finding show more/next button by xpath. e.g. enter 'text()="Show more"' to get a final xpath of '//button[text()="Show more"]'. Another example would be 'contains(@aria-label, "next")'.
