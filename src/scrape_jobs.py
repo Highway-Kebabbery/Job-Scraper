@@ -438,11 +438,13 @@ def main():
             company_object.set_previous_jobs()
         except Exception:
             company_object.send_notification('error_getting_previous_jobs')
+            continue
 
         try:
             company_object.set_current_jobs(child=company[3])
         except Exception:
             company_object.send_notification('error_getting_current_jobs')
+            continue
 
         if company_object.current_jobs:    # Don't evaluate the newness of jobs if none exist
             for job in company_object.current_jobs:
