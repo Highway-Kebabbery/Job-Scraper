@@ -54,7 +54,7 @@ The application is currently only configured to target smaller companies with a 
 6. Navigate to `Settings > Apps > Termux`, check Termux for battery-related settings, and set them to "unrestricted" or otherwise to not be optimized for battery life. Do the same for Termux:API.
 7. Navigate to `Settings > Apps > Termux > Draw over other apps` and allow permission, otherwise `--action termux-open-url` won't open webpages from the notification.
 8. Navigate to `Settings > Apps > three-dot menu > Special Access > All files access > FX` and enable access.
-9. In `Settings > Battery`, check `Background usage limits > Never auto sleeping apps` for any Termux related apps.
+9. In `Settings > Battery`, check `Background usage limits > Never auto sleeping apps > +` for any Termux related apps.
     * As of Android 14, turning off battery optimization removes them from this list, but it is best practice to ensure absolutely no battery optimization happens for these apps.
 
 #### Configure FX File Explorer:
@@ -96,7 +96,7 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
     * Mirrors are only required when installing/updating packages and dependencies. In the event that a connected mirror goes down, execute `termux-change-repo` from the command line to select a new mirror.
 10. When prompted, choose whether to grant Termux access to device storage.
     * This step is optional for this project, but it facilitates command line access of the files in device storage.
-    * To set up Termux storage access at a alter time, execute `termux-setup-storage` from the command line. **You must completely exit Termux after executing this command.**
+    * To set up Termux storage access at a later time, execute `termux-setup-storage` from the command line. **You must completely exit Termux after executing this command.**
 11. When setup finishes, COMPLETELY exit Termux. To do so, use the `Exit` option in the Termux persistent notification.
 
     <img src="./docs/images/termux-exit.jpg" alt="Termux 'Exit' option shown in the persisten notification." width="200"/>
