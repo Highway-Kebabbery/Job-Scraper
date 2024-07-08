@@ -57,7 +57,7 @@ class CompanyJobsFinder():
 
     __bash_shebang = '#!/data/data/com.termux/files/usr/bin/bash'
 
-    def __init__(self, company_name, url, job_title_tag, class_by_selector, job_title_tag_attr_val, loads_by_page, show_more_button_text, wd, project_version, fast_notifications):
+    def __init__(self, company_name, url, job_title_tag, title_class_by_selector, job_title_tag_attr_val, loads_by_page, show_more_button_text, wd, project_version, fast_notifications):
         self.__company_name = company_name
         self.__url = url
         self.__job_title_tag = job_title_tag
@@ -68,7 +68,7 @@ class CompanyJobsFinder():
         self.__show_more_button_text = show_more_button_text
         
         # Use the attribute that identifies the job title tag to set the Selenium `By` method to be called.
-        match class_by_selector:
+        match title_class_by_selector:
             case 'id':
                 self.__title_class_by_selector = By.ID
             case 'name':
@@ -85,9 +85,10 @@ class CompanyJobsFinder():
                 self.__title_class_by_selector = By.CLASS_NAME
             case 'css selector':
                 self.__title_class_by_selector = By.CSS_SELECTOR
+            case '':    # This case is for company profiles that can't be completed due to a present lack of job listings. They can still be arranged to send a daily link to the "Careers" page to check for jobs manually.
+                pass
             case _:
-                print('Invalid class_by_selector argument passed to CompanyJobsFinder.0')
-                raise SystemExit
+                print('Invalid class_by_selector argument passed to CompanyJobsFinder.')
 
         # Configure notification parameters
         self.__new_jobs_today_msg_title = f'New job found today at {company_name}!'
@@ -273,9 +274,11 @@ class CompanyJobsFinder():
                 else:
                     self.__notification_command = f'termux-notification --title "{self.__new_jobs_yesterday_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-daily-{self.__company_name} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-daily-{self.__company_name}" '
             case 'error_getting_current_jobs':
-                self.__notification_command = f'termux-notification --title "Failed to retrieve current listings" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id failure-to-retrieve-jobs-{self.__company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-retrieve-jobs-{self.__company_name}" '
+                self.__notification_command = f'termux-notification --title "Failed to retrieve current listings for {self.__company_name}." --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id failure-to-retrieve-jobs-{self.__company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-retrieve-jobs-{self.__company_name}" '
             case 'error_getting_previous_jobs':
-                self.__notification_command = f'termux-notification --title "Failed to load previous listings" --content "Check the {self.__company_name} .json file for existence and for potential errors." --action "termux-open-url {self.__url}" --id failure-to-load-jobs-{self.__company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-load-jobs-{self.__company_name}" '
+                self.__notification_command = f'termux-notification --title "Failed to load previous listings for {self.__company_name}." --content "Check the {self.__company_name} .json file for existence and for potential errors." --action "termux-open-url {self.__url}" --id failure-to-load-jobs-{self.__company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-load-jobs-{self.__company_name}" '
+            case 'cannot_scrape':
+                self.__notification_command = f'termux-notification --title "Check listings manually for {self.__company_name}." --content "Tap now to visit the {self.__company_name} careers page. If they\'ve added a job, then complete the company profile in scrape_jobs.py." --action "termux-open-url {self.__url}" --id failure-to-retrieve-jobs-{self.__company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-retrieve-jobs-{self.__company_name}" '
         
         # Send the notification
         if notif_type == 'daily':
@@ -385,17 +388,20 @@ def main():
         'unique_job_title_tag_attr_val' (a unique attribute for targeting job title tags),
         do_job_titles_load_by_individual_pages_Boolean (i.e. Is there a button like "show next" that loads one page at a time, only displaying some of the job titles (True), or is there a button like "show more" that, when clicked, displays all previously visible job titles **and** a new set of titles all at once after being clicked (False)?),
         'show_more/next_button_identifier' (Identifier for finding show more/next button by xpath. e.g. enter 'text()="Show more"' to get a final xpath of '//button[text()="Show more"]'. Another example would be 'contains(@aria-label, "next")'.)
+        company_profile_complete_Boolean (You can't scrape from a company if they have no listings from which to pull the relevant HTML info, but you can still schedule a daily notification with a link to their page. It reminds you to update the script with the HTML tag info if they list a job.)
     ]
+
+    example_incomplete_company_profile = ['unique company name', 'careers_page_url', '', False, '', '', False, '', False]    # You can't figure out how to scrape jobs if the company has none listed, but you CAN make an incomplete profile like this to get a daily link to their "Careers" page.
     '''
-    jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', True, 'class name', 'styles--3TJHk', False, 'text()="Show more"']
-    feathr = ['Feathr', 'https://jobs.ashbyhq.com/feathr', '', False, '', '', False,'']    # PRIMARY TARGET. I'M COMING FOR YOU; I ALWAYS WIN.
-    # resilience = ['Resilience', 'https://resilience.wd1.myworkdayjobs.com/Resilience_Careers', 'a', False, 'class name', 'css-19uc56f', True, 'contains(@aria-label, "next")']    # Added simply to test a site that loads jobs by page, but kept because it's fun to keep tabs on old employers.
-    admiral = ['Admiral', 'https://jobs.ashbyhq.com/admiral?embed=js', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook']    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
-    infotech = ['Infotech', 'https://recruiting.ultipro.com/INF1010INFT/JobBoard/a1f626ce-9a88-4c30-86ee-6562ee8ea030/?q=&o=postedDateDesc', 'a', False, 'class name', 'opportunity-link', False, 'NonsenseGobbledygook']  # Unable to fill out more/next button info as it wasn't present when the copany was tested.
-    mobiquity = ['Mobiquity', 'https://www.mobiquity.com/careers/americas/', '', False, '', '', False, '']    # Has a Gainesville office. I'd need to implement a way to filter by sibling elements before deciding to pull a job title because they have a lot of global positions. I can't guess how to filter for American jobs given there are none available right now. Worth checking on manually?
-    byppo = ['Byppo', 'https://www.byppo.com/byppo-careers-page', '', False, '', '', False, '']    # Local, but has no listings available and so I don't know what to scrape for.
-    opie = ['OPIE Software', 'https://www.opiesoftware.com/careers', '', False, '', '', False, '']    # Local company. No positions open, not sure how to scrape.
-    golok = ['Golok', 'https://golokglobal.com/jobs/', 'h2', False, 'class name', 'awsm-job-post-title', False, 'NonsenseGobbledygook']    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
+    jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', True, 'class name', 'styles--3TJHk', False, 'text()="Show more"', True]
+    feathr = ['Feathr', 'https://jobs.ashbyhq.com/feathr', '', False, '', '', False, '', False]    # PRIMARY TARGET. I'M COMING FOR YOU; I ALWAYS WIN.
+    # resilience = ['Resilience', 'https://resilience.wd1.myworkdayjobs.com/Resilience_Careers', 'a', False, 'class name', 'css-19uc56f', True, 'contains(@aria-label, "next")', True]    # Added simply to test a site that loads jobs by page, but kept because it's fun to keep tabs on old employers.
+    admiral = ['Admiral', 'https://jobs.ashbyhq.com/admiral?embed=js', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook', True]    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
+    infotech = ['Infotech', 'https://recruiting.ultipro.com/INF1010INFT/JobBoard/a1f626ce-9a88-4c30-86ee-6562ee8ea030/?q=&o=postedDateDesc', 'a', False, 'class name', 'opportunity-link', False, 'NonsenseGobbledygook', True]  # Unable to fill out more/next button info as it wasn't present when the copany was tested.
+    mobiquity = ['Mobiquity', 'https://www.mobiquity.com/careers/americas/', '', False, '', '', False, '', False]    # Has a Gainesville office. I'd need to implement a way to filter by sibling elements before deciding to pull a job title because they have a lot of global positions. I can't guess how to filter for American jobs given there are none available right now. Worth checking on manually?
+    byppo = ['Byppo', 'https://www.byppo.com/byppo-careers-page', '', False, '', '', False, '', False]    # Local, but has no listings available and so I don't know what to scrape for.
+    opie = ['OPIE Software', 'https://www.opiesoftware.com/careers', '', False, '', '', False, '', False]    # Local company. No positions open, not sure how to scrape.
+    golok = ['Golok', 'https://golokglobal.com/jobs/', 'h2', False, 'class name', 'awsm-job-post-title', False, 'NonsenseGobbledygook', True]    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
     companies = [jagex, feathr, admiral, infotech, mobiquity, byppo, opie, golok]
 
     # Validate that no two companies 'n' have the same name in companies[n][0].
@@ -433,6 +439,11 @@ def main():
             this_execution.fast_notifications
             )
         
+        # Send careers page link for incomplete company profiles
+        if company[8] == False:
+            company_object.send_notification('cannot_scrape')
+            continue
+
         # Compare current jobs to last execution's findings
         try:
             company_object.set_previous_jobs()
