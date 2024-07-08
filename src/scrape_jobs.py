@@ -196,7 +196,7 @@ class CompanyJobsFinder():
                 
                 if child == False:
                     for job_title_tag in tags:
-                        if str(type(job_title_tag.string)) != "<class 'NoneType'>":    # This is a specific fix for a page that reused the element containing the job title elsewhere in the page with a different structure where it didn't contain the job title. It was a redundant "highlighted jobs" section.
+                        if str(type(job_title_tag.string)) != "<class 'NoneType'>":    # If a tag with no text is targeted, it returns an element of this type. This is a specific fix for a page that reused the element containing the job title elsewhere in the page with a different structure where it didn't contain the job title. Obviously a unique identifier is picked for scraping, but this seems to be an edge case. The reused tag with the same identifier was related to job listings, but it was a redundant "highlighted jobs" section.
                             self.__current_jobs.append(job_title_tag.string.replace('\u200b', '').replace('\u2013', '-').strip())
                 else:
                     # Pull the string from the child of each uniquely identifiable parent tag. Only works if there's only one child.
@@ -408,8 +408,8 @@ def main():
 
     # Begin execution
     this_execution = ThisExecution(
-        project_version='0.5.0',
-        fast_notifications=True
+        project_version='1.0.0',
+        fast_notifications=False
         )
     execution_logger = LogExecution(
         len(companies),
@@ -518,7 +518,10 @@ def desktop_scraper():
             this_execution.fast_notifications
             )
 
-        company_object.set_current_jobs(child=company[3])
+        try:
+            company_object.set_current_jobs(child=company[3])
+        except Exception:
+            print('Error retrieving current jobs.')
         print(company_object.current_jobs)       
 
 if __name__ == '__main__':
