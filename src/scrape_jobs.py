@@ -59,6 +59,7 @@ class CompanyJobsFinder():
 
     def __init__(self, company_name, url, job_title_tag, title_class_by_selector, job_title_tag_attr_val, loads_by_page, show_more_button_text, wd, project_version, fast_notifications):
         self.__company_name = company_name
+        self.__hyphenated_company_name = self.__company_name.replace(' ', '-')
         self.__url = url
         self.__job_title_tag = job_title_tag
         self.__job_title_tag_attr_val = job_title_tag_attr_val
@@ -99,10 +100,10 @@ class CompanyJobsFinder():
         # Build file paths
         self.__project_version = project_version
         self.__wd = wd
-        self.__company_data_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/data/{self.__company_name}.json'
+        self.__company_data_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/data/{self.__hyphenated_company_name}.json'
         self.__no_job_jpg_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/media/no_job.jpg'
         self.__job_jpg_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/media/job.jpg'
-        self.__notification_script_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/scripts/daily_notify_{company_name}.sh'
+        self.__notification_script_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/scripts/daily_notify_{self.__hyphenated_company_name}.sh'
         
         self.__set_firefox_driver()
 
@@ -267,18 +268,18 @@ class CompanyJobsFinder():
         # Choose content of the notification
         match notif_type:
             case 'per_execution':
-                self.__notification_command = f'termux-notification --title "{self.__new_jobs_today_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-{self.__company_name} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-{self.__company_name}" '
+                self.__notification_command = f'termux-notification --title "{self.__new_jobs_today_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-{self.__hyphenated_company_name} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-{self.__hyphenated_company_name}" '
             case 'daily':
                 if self.__previous_jobs['new_job_detected'] == False:
-                    self.__notification_command = f'termux-notification --title "{self.__no_jobs_yesterday_msg_title}" --content "Keep eating ramen noodles." --id big_unemployed-daily-{self.__company_name} --image-path {self.__no_job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_unemployed-daily-{self.__company_name}" '
+                    self.__notification_command = f'termux-notification --title "{self.__no_jobs_yesterday_msg_title}" --content "Keep eating ramen noodles." --id big_unemployed-daily-{self.__hyphenated_company_name} --image-path {self.__no_job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_unemployed-daily-{self.__hyphenated_company_name}" '
                 else:
-                    self.__notification_command = f'termux-notification --title "{self.__new_jobs_yesterday_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-daily-{self.__company_name} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-daily-{self.__company_name}" '
+                    self.__notification_command = f'termux-notification --title "{self.__new_jobs_yesterday_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-daily-{self.__hyphenated_company_name} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-daily-{self.__hyphenated_company_name}" '
             case 'error_getting_current_jobs':
-                self.__notification_command = f'termux-notification --title "Failed to retrieve current listings for {self.__company_name}." --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id failure-to-retrieve-jobs-{self.__company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-retrieve-jobs-{self.__company_name}" '
+                self.__notification_command = f'termux-notification --title "Failed to retrieve current listings for {self.__company_name}." --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id failure-to-retrieve-jobs-{self.__hyphenated_company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-retrieve-jobs-{self.__hyphenated_company_name}" '
             case 'error_getting_previous_jobs':
-                self.__notification_command = f'termux-notification --title "Failed to load previous listings for {self.__company_name}." --content "Check the {self.__company_name} .json file for existence and for potential errors." --action "termux-open-url {self.__url}" --id failure-to-load-jobs-{self.__company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-load-jobs-{self.__company_name}" '
+                self.__notification_command = f'termux-notification --title "Failed to load previous listings for {self.__company_name}." --content "Check the {self.__company_name} .json file for existence and for potential errors." --action "termux-open-url {self.__url}" --id failure-to-load-jobs-{self.__hyphenated_company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-load-jobs-{self.__hyphenated_company_name}" '
             case 'cannot_scrape':
-                self.__notification_command = f'termux-notification --title "Check listings manually for {self.__company_name}." --content "Tap now to visit the {self.__company_name} careers page. If they\'ve added a job, then complete the company profile in scrape_jobs.py." --action "termux-open-url {self.__url}" --id failure-to-retrieve-jobs-{self.__company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-retrieve-jobs-{self.__company_name}" '
+                self.__notification_command = f'termux-notification --title "Check listings manually for {self.__company_name}." --content "Tap now to visit the {self.__company_name} careers page. If they\'ve added a job, then complete the company profile in scrape_jobs.py." --action "termux-open-url {self.__url}" --id failure-to-retrieve-jobs-{self.__hyphenated_company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-retrieve-jobs-{self.__hyphenated_company_name}" '
         
         # Send the notification
         if notif_type == 'daily':
@@ -395,12 +396,12 @@ def main():
     '''
     jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', True, 'class name', 'styles--3TJHk', False, 'text()="Show more"', True]
     feathr = ['Feathr', 'https://jobs.ashbyhq.com/feathr', '', False, '', '', False, '', False]    # PRIMARY TARGET. I'M COMING FOR YOU; I ALWAYS WIN.
-    # resilience = ['Resilience', 'https://resilience.wd1.myworkdayjobs.com/Resilience_Careers', 'a', False, 'class name', 'css-19uc56f', True, 'contains(@aria-label, "next")', True]    # Added simply to test a site that loads jobs by page, but kept because it's fun to keep tabs on old employers.
+    resilience = ['Resilience', 'https://resilience.wd1.myworkdayjobs.com/Resilience_Careers', 'a', False, 'class name', 'css-19uc56f', True, 'contains(@aria-label, "next")', True]    # Added simply to test a site that loads jobs by page, but kept because it's fun to keep tabs on old employers.
     admiral = ['Admiral', 'https://jobs.ashbyhq.com/admiral?embed=js', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook', True]    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
     infotech = ['Infotech', 'https://recruiting.ultipro.com/INF1010INFT/JobBoard/a1f626ce-9a88-4c30-86ee-6562ee8ea030/?q=&o=postedDateDesc', 'a', False, 'class name', 'opportunity-link', False, 'NonsenseGobbledygook', True]  # Unable to fill out more/next button info as it wasn't present when the copany was tested.
     mobiquity = ['Mobiquity', 'https://www.mobiquity.com/careers/americas/', '', False, '', '', False, '', False]    # Has a Gainesville office. I'd need to implement a way to filter by sibling elements before deciding to pull a job title because they have a lot of global positions. I can't guess how to filter for American jobs given there are none available right now. Worth checking on manually?
-    byppo = ['Byppo', 'https://www.byppo.com/byppo-careers-page', '', False, '', '', False, '', False]    # Local, but has no listings available and so I don't know what to scrape for.
-    opie = ['OPIE Software', 'https://www.opiesoftware.com/careers', '', False, '', '', False, '', False]    # Local company. No positions open, not sure how to scrape.
+    byppo = ['Byppo', 'https://www.byppo.com/byppo-careers-page', '', False, '', '', False, '', False]
+    opie = ['OPIE Software', 'https://www.opiesoftware.com/careers', '', False, '', '', False, '', False]
     golok = ['Golok', 'https://golokglobal.com/jobs/', 'h2', False, 'class name', 'awsm-job-post-title', False, 'NonsenseGobbledygook', True]    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
     companies = [jagex, feathr, admiral, infotech, mobiquity, byppo, opie, golok]
 
@@ -409,7 +410,7 @@ def main():
     counter = Counter(company_names)
     duplicate_names = [i for i, j in counter.items() if j > 1]
     if duplicate_names:
-        print('Error. Duplicate company name detected.')
+        os.system('termux-notification --title "Error. Duplicate company name detected." --content "Ensure that all companies have a unique name in the zeroth index of their company attributes list." --id duplicate-company-names --button1 "Dismiss" --button1-action "termux-notification-remove duplicate-company-names" ')
         raise SystemExit
 
     # Begin execution
