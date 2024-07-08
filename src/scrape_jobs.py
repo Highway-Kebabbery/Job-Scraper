@@ -201,7 +201,7 @@ class CompanyJobsFinder():
                 else:
                     # Pull the string from the child of each uniquely identifiable parent tag. Only works if there's only one child.
                     for parent_tag in tags:
-                        if str(type(job_title_tag.string)) != "<class 'NoneType'>":
+                        if str(type(parent_tag.string)) != "<class 'NoneType'>":
                             self.__current_jobs.append(parent_tag.find().string.replace('\u200b', '').replace('\u2013', '-').strip())
             
             def click_button():
