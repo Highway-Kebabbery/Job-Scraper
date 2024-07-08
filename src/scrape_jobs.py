@@ -157,72 +157,80 @@ class CompanyJobsFinder():
 
         Returns:
             List of strings: List of job titles currently available at the company.
-        """        
-        self.__driver.get(self.__url)
+        """
+        try:
+            self.__driver.get(self.__url)
 
-        # When the target element is present, scrape and parse html.
-        WebDriverWait(self.__driver, 10).until(
-            EC.presence_of_element_located((self.__title_class_by_selector, self.__job_title_tag_attr_val))
-        )
+            # When the target element is present, scrape and parse html.
+            WebDriverWait(self.__driver, 10).until(
+                EC.presence_of_element_located((self.__title_class_by_selector, self.__job_title_tag_attr_val))
+            )
         
-        def scrape_job_titles():
-            html = self.__driver.page_source
-            soup = BeautifulSoup(html, 'html.parser')
+        except Exception as e:
+            print(e)
 
-            # Locate job titles.
-            # Hey, so... I've only actually tested this on 'class name'. I don't actually know yet whether the other cases work until I get around to finding a bunch of instances in which I need them to work.
-            match self.__title_class_by_selector:
-                case 'id':
-                    tags = soup.find_all(self.__job_title_tag, id=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
-                case 'name':
-                    tags = soup.find_all(self.__job_title_tag, name=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
-                case 'xpath':
-                    tags = soup.find_all(self.__job_title_tag, xpath=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
-                case 'link text':
-                    pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
-                case 'partial link text':
-                    pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
-                case 'tag name':
-                    pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
-                case 'class name':
-                    tags = soup.find_all(self.__job_title_tag, class_=self.__job_title_tag_attr_val)
-                case 'css selector':
-                    pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
-            
-            if child == False:
-                for job_title_tag in tags:
-                    self.__current_jobs.append(job_title_tag.string.replace('\u200b', '').replace('\u2013', '-').strip())    # I have seen horrors beyond comprehension.
-            else:
-                # Pull the string from the child of each uniquely identifiable parent tag. Only works if there's only one child.
-                for parent_tag in tags:
-                    self.__current_jobs.append(parent_tag.find().string.replace('\u200b', '').replace('\u2013', '-').strip())
-        
-        def click_button():
-            try:
-                button = WebDriverWait(self.__driver, 5).until(
-                    EC.element_to_be_clickable((By.XPATH, f'//button[{self.__show_more_button_text}]'))
-                )
-                self.__driver.execute_script('arguments[0].scrollIntoView(true);', button)
-                self.__driver.execute_script('arguments[0].click();', button)
-                time.sleep(2)
-                return True
-            except:
-                return False
-        
-        if self.__loads_by_page:
-            # When jobs are shown one page at a time: scrape jobs, click next, and repeat until all pages are scraped
-            scrape_job_titles()
-            while True:
-                if not click_button():
-                    break
-                scrape_job_titles()
         else:
-            # If jobs are all shown on one page when a "show more" button is clicked, then click until it's gone and then scrape all jobs at once.
-            while click_button():
-                pass
-            scrape_job_titles()
-    
-        self.__driver.quit()
+            def scrape_job_titles():
+                html = self.__driver.page_source
+                soup = BeautifulSoup(html, 'html.parser')
+
+                # Locate job titles.
+                # Hey, so... I've only actually tested this on 'class name'. I don't actually know yet whether the other cases work until I get around to finding a bunch of instances in which I need them to work.
+                match self.__title_class_by_selector:
+                    case 'id':
+                        tags = soup.find_all(self.__job_title_tag, id=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
+                    case 'name':
+                        tags = soup.find_all(self.__job_title_tag, name=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
+                    case 'xpath':
+                        tags = soup.find_all(self.__job_title_tag, xpath=self.__job_title_tag_attr_val)    # This kwarg *might* work. Haven't tested it.
+                    case 'link text':
+                        pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
+                    case 'partial link text':
+                        pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
+                    case 'tag name':
+                        pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
+                    case 'class name':
+                        tags = soup.find_all(self.__job_title_tag, class_=self.__job_title_tag_attr_val)
+                    case 'css selector':
+                        pass    # I don't even know which kwarg to use here, and I won't until I have a good reason to figure it out.
+                
+                if child == False:
+                    for job_title_tag in tags:
+                        if str(type(job_title_tag.string)) != "<class 'NoneType'>":    # This is a specific fix for a page that reused the element containing the job title elsewhere in the page with a different structure where it didn't contain the job title. It was a redundant "highlighted jobs" section.
+                            self.__current_jobs.append(job_title_tag.string.replace('\u200b', '').replace('\u2013', '-').strip())
+                else:
+                    # Pull the string from the child of each uniquely identifiable parent tag. Only works if there's only one child.
+                    for parent_tag in tags:
+                        if str(type(job_title_tag.string)) != "<class 'NoneType'>":
+                            self.__current_jobs.append(parent_tag.find().string.replace('\u200b', '').replace('\u2013', '-').strip())
+            
+            def click_button():
+                try:
+                    button = WebDriverWait(self.__driver, 5).until(
+                        EC.element_to_be_clickable((By.XPATH, f'//button[{self.__show_more_button_text}]'))
+                    )
+                    self.__driver.execute_script('arguments[0].scrollIntoView(true);', button)
+                    self.__driver.execute_script('arguments[0].click();', button)
+                    time.sleep(2)
+                    return True
+                except:
+                    return False
+            
+            if self.__loads_by_page:
+                # When jobs are shown one page at a time: scrape jobs, click next, and repeat until all pages are scraped
+                scrape_job_titles()
+                while True:
+                    if not click_button():
+                        break
+                    scrape_job_titles()
+            else:
+                # If jobs are all shown on one page when a "show more" button is clicked, then click until it's gone and then scrape all jobs at once.
+                while click_button():
+                    pass
+                scrape_job_titles()
+        
+        finally:
+            self.__driver.quit()
 
     def dump_current_jobs_json(self, new_job_detected):
         """This method saves the current job listings to a .json file for comparison to future job listings.
@@ -247,23 +255,30 @@ class CompanyJobsFinder():
         else:
             write_json()
     
-    def send_notification(self, daily_reminder=False):
+    def send_notification(self, notif_type):
         """Build and send notifications about the status of job listings at the company.
 
         Args:
-            daily_reminder (bool, optional): Flags whether to send the single daily message summarizing yesterday's findings. Defaults to False.
+            notif_type (str): 'per_execution': Per-execution notification about finding a new job listing.
+                              'daily': Daily summary notification sent regardless of findings.
+                              'error_getting_current_jobs': Failure to retrieve current job listings.
         """
         # Choose content of the notification
-        if daily_reminder == True:
-            if self.__previous_jobs['new_job_detected'] == False:    # Most likely message to occur
-                self.__notification_command = f'termux-notification --title "{self.__no_jobs_yesterday_msg_title}" --content "Keep eating ramen noodles." --id big_unemployed-daily-{self.__company_name} --image-path {self.__no_job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_unemployed-daily-{self.__company_name}" '
-            else:
-                self.__notification_command = f'termux-notification --title "{self.__new_jobs_yesterday_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-daily-{self.__company_name} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-daily-{self.__company_name}" '
-        else:
-            self.__notification_command = f'termux-notification --title "{self.__new_jobs_today_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-{self.__company_name} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-{self.__company_name}" '
+        match notif_type:
+            case 'per_execution':
+                self.__notification_command = f'termux-notification --title "{self.__new_jobs_today_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-{self.__company_name} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-{self.__company_name}" '
+            case 'daily':
+                if self.__previous_jobs['new_job_detected'] == False:
+                    self.__notification_command = f'termux-notification --title "{self.__no_jobs_yesterday_msg_title}" --content "Keep eating ramen noodles." --id big_unemployed-daily-{self.__company_name} --image-path {self.__no_job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_unemployed-daily-{self.__company_name}" '
+                else:
+                    self.__notification_command = f'termux-notification --title "{self.__new_jobs_yesterday_msg_title}" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id big_employed-daily-{self.__company_name} --image-path {self.__job_jpg_filepath} --button1 "Dismiss" --button1-action "termux-notification-remove big_employed-daily-{self.__company_name}" '
+            case 'error_getting_current_jobs':
+                self.__notification_command = f'termux-notification --title "Failed to retrieve current listings" --content "Tap now to visit the {self.__company_name} careers page." --action "termux-open-url {self.__url}" --id failure-to-retrieve-jobs-{self.__company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-retrieve-jobs-{self.__company_name}" '
+            case 'error_getting_previous_jobs':
+                self.__notification_command = f'termux-notification --title "Failed to load previous listings" --content "Check the {self.__company_name} .json file for existence and for potential errors." --action "termux-open-url {self.__url}" --id failure-to-load-jobs-{self.__company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-load-jobs-{self.__company_name}" '
         
         # Send the notification
-        if daily_reminder == True:
+        if notif_type == 'daily':
             self.__build_notif_shell_script()
             self.__schedule_daily_notification()
         else:
@@ -375,13 +390,13 @@ def main():
     jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', True, 'class name', 'styles--3TJHk', False, 'text()="Show more"']
     # feathr = ['Feathr', 'https://jobs.ashbyhq.com/feathr', '', , '', '', ,'']    # PRIMARY TARGET. I'M COMING FOR YOU; I ALWAYS WIN.
     # resilience = ['Resilience', 'https://resilience.wd1.myworkdayjobs.com/Resilience_Careers', 'a', False, 'class name', 'css-19uc56f', True, 'contains(@aria-label, "next")']    # Added simply to test a site that loads jobs by page, but kept because it's fun to keep tabs on old employers.
-    admiral = ['Admiral', 'https://jobs.ashbyhq.com/admiral?embed=js', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook']    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
-    infotech = ['Infotech', 'https://recruiting.ultipro.com/INF1010INFT/JobBoard/a1f626ce-9a88-4c30-86ee-6562ee8ea030/?q=&o=postedDateDesc', 'a', False, 'class name', 'opportunity-link', False, 'NonsenseGobbledygook']  # Unable to fill out more/next button info as it wasn't present when the copany was tested.
+#    admiral = ['Admiral', 'https://jobs.ashbyhq.com/admiral?embed=js', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook']    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
+#    infotech = ['Infotech', 'https://recruiting.ultipro.com/INF1010INFT/JobBoard/a1f626ce-9a88-4c30-86ee-6562ee8ea030/?q=&o=postedDateDesc', 'a', False, 'class name', 'opportunity-link', False, 'NonsenseGobbledygook']  # Unable to fill out more/next button info as it wasn't present when the copany was tested.
     # mobiquity = ['Mobiquity', 'https://www.mobiquity.com/careers/americas/', '', , '', '', , '']    # Has a Gainesville office. I'd need to implement a way to filter by sibling elements before deciding to pull a job title because they have a lot of global positions. I can't guess how to filter for American jobs given there are none available right now. Worth checking on manually?
     # byppo = ['Byppo', 'https://www.byppo.com/byppo-careers-page', '', , '', '', , '']    # Local, but has no listings available and so I don't know what to scrape for.
     # opie = ['OPIE Software', 'https://www.opiesoftware.com/careers', '', , '', '', , '']    # Local company. No positions open, not sure how to scrape.
-    golok = ['Golok', 'https://golokglobal.com/jobs/', 'h2', False, 'class name', 'awsm-job-post-title', False, 'NonsenseGobbledygook']    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
-    companies = [jagex, admiral, infotech, golok]
+#    golok = ['Golok', 'https://golokglobal.com/jobs/', 'h2', False, 'class name', 'awsm-job-post-title', False, 'NonsenseGobbledygook']    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
+    companies = [jagex]
 
     # Validate that no two companies 'n' have the same name in companies[n][0].
     company_names = [company[0] for company in companies]
@@ -419,8 +434,16 @@ def main():
             )
         
         # Compare current jobs to last execution's findings
-        company_object.set_previous_jobs()
-        company_object.set_current_jobs(child=company[3])
+        try:
+            company_object.set_previous_jobs()
+        except Exception:
+            company_object.send_notification('error_getting_previous_jobs')
+
+        try:
+            company_object.set_current_jobs(child=company[3])
+        except Exception:
+            company_object.send_notification('error_getting_current_jobs')
+
         if company_object.current_jobs:    # Don't evaluate the newness of jobs if none exist
             for job in company_object.current_jobs:
                 if job not in company_object.previous_jobs['Titles']:
@@ -432,14 +455,14 @@ def main():
         if datetime.strptime(company_object.previous_jobs['date_json_mod'], '%Y-%m-%d %H:%M:%S.%f').date() != date.today():
             # First execution of the day prepares the daily notification.
             if company_object.previous_jobs['new_job_detected'] == False:
-                company_object.send_notification(daily_reminder=True)
+                company_object.send_notification('daily')
             else:
-                company_object.send_notification(daily_reminder=True)
+                company_object.send_notification('daily')
                 company_object.dump_current_jobs_json(new_job_detected)
         else:
             # Subsequent executions only notify is a job was found either on the current execution or earlier in the same day.
             if company_object.previous_jobs['new_job_detected'] == True:
-                company_object.send_notification()  # Index number is appended to --id attribute in termux-notification which generates a unique notification id per company so notifications don't overwrite each other.
+                company_object.send_notification('per_execution')  # Index number is appended to --id attribute in termux-notification which generates a unique notification id per company so that notifications don't overwrite each other.
 
     # Log execution finish
     execution_logger.log_timestamp(start=False)
@@ -473,7 +496,7 @@ def desktop_scraper():
         'show_more/next_button_identifier' (Identifier for finding show more/next button by xpath. e.g. enter 'text()="Show more"' to get a final xpath of '//button[text()="Show more"]'. Another example would be 'contains(@aria-label, "next")'.
     ]
     '''
-    new_company = ['Golok', 'https://golokglobal.com/jobs/', 'h2', False, 'class name', 'awsm-job-post-title', False, 'NonsenseGobbledygook']
+    new_company = ['Infotech', 'https://recruiting.ultipro.com/INF1010INFT/JobBoard/a1f626ce-9a88-4c30-86ee-6562ee8ea030/?q=&o=postedDateDesc', 'a', False, 'class name', 'opportunity-link', False, 'NonsenseGobbledygook']
     companies = [new_company]
 
     # Begin execution
