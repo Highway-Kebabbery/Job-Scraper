@@ -473,6 +473,7 @@ def main():
 
             if company[8] == False:
                 # Send careers page link for incomplete company profiles that can't be scraped.
+                print(company_object.__previous_jobs, company_object.current_jobs)
                 company_object.send_notification('cannot_scrape')
             else:
                 # Send a summary of yesterday's findings for companies that are able to be scraped.
