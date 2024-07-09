@@ -426,7 +426,7 @@ def main():
         )
     execution_logger.log_timestamp(start=True)
     new_job_detected = False
-    if company[8] == False: print(new_job_detected, 1)
+    print('new_job_detected: ', new_job_detected)
     for company in companies:
         company_object = CompanyJobsFinder(
             company[0],
