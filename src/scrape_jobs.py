@@ -241,7 +241,6 @@ class CompanyJobsFinder():
             new_job_detected (bool): Used when building the daily notification during the first run of each day to determine whether jobs were detected the previous day.
         """
         json_formatted_data = {'Titles':self.__current_jobs, 'date_json_mod':datetime.now(), 'new_job_detected':new_job_detected}
-        print(json_formatted_data)
 
         def write_json():
             with open(self.__company_data_filepath, 'w') as file:
@@ -418,7 +417,7 @@ def main():
     # Begin execution
     this_execution = ThisExecution(
         project_version='1.0.0',
-        fast_notifications=False
+        fast_notifications=True
         )
     execution_logger = LogExecution(
         len(companies),
@@ -441,7 +440,7 @@ def main():
             this_execution.project_version,
             this_execution.fast_notifications
             )
-
+        
         # Compare current jobs to last execution's findings
         try:
             company_object.set_previous_jobs()
@@ -463,11 +462,17 @@ def main():
                     new_job_detected = True
                     company_object.dump_current_jobs_json(new_job_detected)
                     break
-            
+        
         # Send notifications
         if datetime.strptime(company_object.previous_jobs['date_json_mod'], '%Y-%m-%d %H:%M:%S.%f').date() != date.today():
             # First execution of the day prepares the daily notification and updates date_json_mod when necessary.
             
+            if not company[8]:
+                print(company_object.previous_jobs, company_object.current_jobs)
+                print(new_job_detected)
+
+
+
             if new_job_detected == False:
                 # Reset 'new_job_detected' flag in the company .json. Change the date to today in the company .json file to avoid this path until tomorrow. These actions already happened if the day's first execution found a new job listing.
                 company_object.dump_current_jobs_json(new_job_detected)
