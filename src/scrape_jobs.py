@@ -404,7 +404,7 @@ def main():
     byppo = ['Byppo', 'https://www.byppo.com/byppo-careers-page', '', False, '', '', False, '', False]
     opie = ['OPIE Software', 'https://www.opiesoftware.com/careers', '', False, '', '', False, '', False]
     golok = ['Golok', 'https://golokglobal.com/jobs/', 'h2', False, 'class name', 'awsm-job-post-title', False, 'NonsenseGobbledygook', True]    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
-    companies = [jagex, feathr, admiral, infotech, mobiquity, byppo, opie, golok]
+    companies = [jagex, feathr]
 
     # Validate that no two companies 'n' have the same name in companies[n][0].
     company_names = [company[0] for company in companies]
