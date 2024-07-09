@@ -404,7 +404,7 @@ def main():
     byppo = ['Byppo', 'https://www.byppo.com/byppo-careers-page', '', False, '', '', False, '', False]
     opie = ['OPIE Software', 'https://www.opiesoftware.com/careers', '', False, '', '', False, '', False]
     golok = ['Golok', 'https://golokglobal.com/jobs/', 'h2', False, 'class name', 'awsm-job-post-title', False, 'NonsenseGobbledygook', True]    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
-    companies = [jagex, feathr, admiral, infotech, mobiquity, byppo, opie, golok]
+    companies = [jagex, feathr]#, admiral, infotech, mobiquity, byppo, opie, golok]
 
     # Validate that no two companies 'n' have the same name in companies[n][0].
     company_names = [company[0] for company in companies]
@@ -440,14 +440,14 @@ def main():
             this_execution.project_version,
             this_execution.fast_notifications
             )
-        if company[8] == False: print(new_job_detected, 2)
+        print(new_job_detected, 2)
         # Compare current jobs to last execution's findings
         try:
             company_object.set_previous_jobs()
         except Exception:
             company_object.send_notification('error_getting_previous_jobs')
             continue
-        if company[8] == False: print(new_job_detected, 3)
+        print(new_job_detected, 3)
         if company[8]:
             # This only needs to be run on companies that have all available information for web scraping.
             try:
@@ -455,27 +455,27 @@ def main():
             except Exception:
                 company_object.send_notification('error_getting_current_jobs')
                 continue
-        if company[8] == False: print(new_job_detected, 4)
+        print(new_job_detected, 4)
         if company_object.current_jobs:    # Don't evaluate the newness of jobs if none exist
             for job in company_object.current_jobs:
                 if job not in company_object.previous_jobs['Titles']:
                     new_job_detected = True
                     company_object.dump_current_jobs_json(new_job_detected)
                     break
-        if company[8] == False: print(new_job_detected, 5)
+        print(new_job_detected, 5)
         # Send notifications
         if datetime.strptime(company_object.previous_jobs['date_json_mod'], '%Y-%m-%d %H:%M:%S.%f').date() != date.today():
             # First execution of the day prepares the daily notification and updates date_json_mod when necessary.
-            if company[8] == False: print(new_job_detected, 6)
+            print(new_job_detected, 6)
             if not company[8]:
                 print(company_object.previous_jobs, company_object.current_jobs)
                 print(new_job_detected)
 
 
-            if company[8] == False: print(new_job_detected, 7)
+            print(new_job_detected, 7)
             if new_job_detected == False:
                 # Reset 'new_job_detected' flag in the company .json. Change the date to today in the company .json file to avoid this path until tomorrow. These actions already happened if the day's first execution found a new job listing.
-                if company[8] == False: print(new_job_detected, 8)
+                print(new_job_detected, 8)
                 company_object.dump_current_jobs_json(new_job_detected)
 
             if company[8] == False:
