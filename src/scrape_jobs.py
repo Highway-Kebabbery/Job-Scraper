@@ -448,12 +448,12 @@ def main():
         except Exception:
             company_object.send_notification('error_getting_previous_jobs')
             continue
-
-        try:
-            company_object.set_current_jobs(child=company[3])
-        except Exception:
-            if company[8]:
-                # This case represents a real failure to scrape because the company profile is completely filled out.
+        
+        if company[8]:
+            # This only needs to be run on companies that have all available information for web scraping.
+            try:
+                company_object.set_current_jobs(child=company[3])
+            except Exception:
                 company_object.send_notification('error_getting_current_jobs')
                 continue
 
