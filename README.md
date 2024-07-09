@@ -13,6 +13,7 @@ This application alerts users of updates to a specified company's (or companies'
 * The scraper is periodically scheduled as a cronjob, so the frequency can be easily changed.
 * The scraper captures all job listings by navigating through "Careers" sections with multiple pages using Selenium.
 * Notifications are linked to each company's "Careers" page, but the job titles for each company can also be easily found in the company .json files.
+* A daily notification containing a link to a company's "Careers" page can be configured by entering a partial company attributes list (see the main() docstring) in the event that a company's "Careers" page cannot be scraped due to an absence of active listings from which the tags and attributes required for scraping can be determined. 
 
 ### Planned:
 The application is currently only configured to target smaller companies with a relatively small number of job listings. Some of the following planned features will allow for targeting larger companies which may have a vast number of listings that are unrelated to the user.
