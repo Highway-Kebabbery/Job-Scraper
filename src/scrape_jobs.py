@@ -282,7 +282,7 @@ class CompanyJobsFinder():
                 self.__notification_command = f'termux-notification --title "Check listings manually for {self.__company_name}." --content "Tap now to visit the {self.__company_name} careers page. If they\'ve added a job, then complete the company profile in scrape_jobs.py." --action "termux-open-url {self.__url}" --id failure-to-retrieve-jobs-{self.__hyphenated_company_name} --button1 "Dismiss" --button1-action "termux-notification-remove failure-to-retrieve-jobs-{self.__hyphenated_company_name}" '
         
         # Send the notification
-        if notif_type == 'daily':
+        if (notif_type == 'daily') or (notif_type == 'cannot_scrape'):
             self.__build_notif_shell_script()
             self.__schedule_daily_notification()
         else:
@@ -372,6 +372,7 @@ def main():
             * Follow the instructions in the desktop_scraper() docstring to test the scraper on new companies.
             * In main(), create and fill out a new company attributes list and then add that list's name to `companies`.
             * Re-comment the desktop_scraper() entry point and uncomment the main() entry point after testing.
+        * If the attributes required for scraping cannot be found because a company has no listings available, a partial attribute list can be created to send a daily link to the company careers page in lieu of automating the task.
         * No two companies should have the same name in the first position of their attribute list.
         * Instantiating `this_execution`:
             * Always make sure the version number matches the release number you're using.
@@ -388,7 +389,7 @@ def main():
         'name_of_attribute_used_for_job_title_tag_selection' (**NOTE**: THIS WILL FAIL IF YOU DON'T USE A VALID VALUE. NOT ALL OF THESE HAVE BEEN TESTED YET. The name of the attribute used to uniquely select job title tag. e.g. 'id', 'name', 'xpath', 'link text', 'partial link text', 'tag name', 'class name', 'css selector'),
         'unique_job_title_tag_attr_val' (a unique attribute for targeting job title tags),
         do_job_titles_load_by_individual_pages_Boolean (i.e. Is there a button like "show next" that loads one page at a time, only displaying some of the job titles (True), or is there a button like "show more" that, when clicked, displays all previously visible job titles **and** a new set of titles all at once after being clicked (False)?),
-        'show_more/next_button_identifier' (Identifier for finding show more/next button by xpath. e.g. enter 'text()="Show more"' to get a final xpath of '//button[text()="Show more"]'. Another example would be 'contains(@aria-label, "next")'.)
+        'show_more/next_button_identifier' (Identifier for finding show more/next button by xpath. e.g. enter 'text()="Show more"' to get a final xpath of '//button[text()="Show more"]'. Another example would be 'contains(@aria-label, "next")'.),
         company_profile_complete_Boolean (You can't scrape from a company if they have no listings from which to pull the relevant HTML info, but you can still schedule a daily notification with a link to their page. It reminds you to update the script with the HTML tag info if they list a job.)
     ]
 
@@ -439,11 +440,6 @@ def main():
             this_execution.project_version,
             this_execution.fast_notifications
             )
-        
-        # Send careers page link for incomplete company profiles
-        if company[8] == False:
-            company_object.send_notification('cannot_scrape')
-            continue
 
         # Compare current jobs to last execution's findings
         try:
@@ -455,8 +451,10 @@ def main():
         try:
             company_object.set_current_jobs(child=company[3])
         except Exception:
-            company_object.send_notification('error_getting_current_jobs')
-            continue
+            if company[8]:
+                # This case represents a real failure to scrape because the company profile is completely filled out.
+                company_object.send_notification('error_getting_current_jobs')
+                continue
 
         if company_object.current_jobs:    # Don't evaluate the newness of jobs if none exist
             for job in company_object.current_jobs:
@@ -467,14 +465,21 @@ def main():
             
         # Send notifications
         if datetime.strptime(company_object.previous_jobs['date_json_mod'], '%Y-%m-%d %H:%M:%S.%f').date() != date.today():
-            # First execution of the day prepares the daily notification.
-            if company_object.previous_jobs['new_job_detected'] == False:
-                company_object.send_notification('daily')
-            else:
-                company_object.send_notification('daily')
+            # First execution of the day prepares the daily notification and updates date_json_mod when necessary.
+            
+            if new_job_detected == False:
+                # Reset 'new_job_detected' flag in the company .json. Change the date to today in the company .json file to avoid this path until tomorrow. These actions already happened if the day's first execution found a new job listing.
                 company_object.dump_current_jobs_json(new_job_detected)
+
+            if company[8] == False:
+                # Send careers page link for incomplete company profiles that can't be scraped.
+                company_object.send_notification('cannot_scrape')
+            else:
+                # Send a summary of yesterday's findings for companies that are able to be scraped.
+                company_object.send_notification('daily')
+            
         else:
-            # Subsequent executions only notify is a job was found either on the current execution or earlier in the same day.
+            # Subsequent executions in the day only notify if a job was found either on the current execution or earlier in the same day.
             if company_object.previous_jobs['new_job_detected'] == True:
                 company_object.send_notification('per_execution')  # Index number is appended to --id attribute in termux-notification which generates a unique notification id per company so that notifications don't overwrite each other.
 
@@ -491,6 +496,7 @@ def desktop_scraper():
             * Excute the script from the parent project folder, otherwise the path will be built incorrectly.
             * The script needs to be executed from the command line; the VS Code debugger won't work.
             * Inspect the company job listings webpage to lcoate the appropriate html tag and attribute value.
+            * If no listings are available to use to find the required attributes, then a partial list can be used to send a daily notification with a link to the "Careers" page.
             * Fill out `new_company` with the relevant information.
             * Execute the script from the command line.
             * When testing is complete, return to main and update the company details section.
@@ -507,7 +513,8 @@ def desktop_scraper():
         'name_of_attribute_used_for_job_title_tag_selection' (**NOTE**: THIS WILL FAIL IF YOU DON'T USE A VALID VALUE. NOT ALL OF THESE HAVE BEEN TESTED YET. The name of the attribute used to uniquely select job title tag. e.g. 'id', 'name', 'xpath', 'link text', 'partial link text', 'tag name', 'class name', 'css selector'),
         'unique_job_title_tag_attr_val' (a unique attribute for targeting job title tags),
         do_job_titles_load_by_individual_pages_Boolean (i.e. Is there a button like "show next" that loads one page at a time, only displaying some of the job titles (True), or is there a button like "show more" that, when clicked, displays all previously visible job titles **and** a new set of titles all at once after being clicked (False)?),
-        'show_more/next_button_identifier' (Identifier for finding show more/next button by xpath. e.g. enter 'text()="Show more"' to get a final xpath of '//button[text()="Show more"]'. Another example would be 'contains(@aria-label, "next")'.
+        'show_more/next_button_identifier' (Identifier for finding show more/next button by xpath. e.g. enter 'text()="Show more"' to get a final xpath of '//button[text()="Show more"]'. Another example would be 'contains(@aria-label, "next")',
+        company_profile_complete_Boolean (You can't scrape from a company if they have no listings from which to pull the relevant HTML info, but you can still schedule a daily notification with a link to their page. It reminds you to update the script with the HTML tag info if they list a job.)
     ]
     '''
     new_company = ['Infotech', 'https://recruiting.ultipro.com/INF1010INFT/JobBoard/a1f626ce-9a88-4c30-86ee-6562ee8ea030/?q=&o=postedDateDesc', 'a', False, 'class name', 'opportunity-link', False, 'NonsenseGobbledygook']
