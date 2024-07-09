@@ -86,8 +86,8 @@ class CompanyJobsFinder():
                 self.__title_class_by_selector = By.CLASS_NAME
             case 'css selector':
                 self.__title_class_by_selector = By.CSS_SELECTOR
-            case '':    # This case is for company profiles that can't be completed due to a present lack of job listings. They can still be arranged to send a daily link to the "Careers" page to check for jobs manually.
-                pass
+            case '':
+                self.__title_class_by_selector = By.CLASS_NAME
             case _:
                 print('Invalid class_by_selector argument passed to CompanyJobsFinder.')
 
@@ -470,7 +470,6 @@ def main():
             
             if new_job_detected == False:
                 # Reset 'new_job_detected' flag in the company .json. Change the date to today in the company .json file to avoid this path until tomorrow. These actions already happened if the day's first execution found a new job listing.
-                print(company_object.previous_jobs, company_object.current_jobs)
                 company_object.dump_current_jobs_json(new_job_detected)
 
             if company[8] == False:
