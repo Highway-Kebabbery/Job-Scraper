@@ -457,6 +457,8 @@ def main():
                 continue
 
         if company_object.current_jobs:    # Don't evaluate the newness of jobs if none exist
+            if not company[8]:
+                print('Entered the test logic.')
             for job in company_object.current_jobs:
                 if job not in company_object.previous_jobs['Titles']:
                     new_job_detected = True
