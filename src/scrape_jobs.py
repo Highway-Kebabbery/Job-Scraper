@@ -396,7 +396,7 @@ def main():
     example_incomplete_company_profile = ['unique company name', 'careers_page_url', '', False, '', '', False, '', False]    # You can't figure out how to scrape jobs if the company has none listed, but you CAN make an incomplete profile like this to get a daily link to their "Careers" page.
     '''
     jagex = ['Jagex', 'https://apply.workable.com/jagex-limited/', 'h3', True, 'class name', 'styles--3TJHk', False, 'text()="Show more"', True]
-    feathr = ['Feathr', 'https://jobs.ashbyhq.com/feathr', '', False, '', '', False, '', False]    # PRIMARY TARGET. I'M COMING FOR YOU; I ALWAYS WIN.
+    feathr = ['Feathr', 'https://jobs.ashbyhq.com/feathr', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook', True]    # PRIMARY TARGET. I'M COMING FOR YOU; I ALWAYS WIN.
     resilience = ['Resilience', 'https://resilience.wd1.myworkdayjobs.com/Resilience_Careers', 'a', False, 'class name', 'css-19uc56f', True, 'contains(@aria-label, "next")', True]    # Added simply to test a site that loads jobs by page, but kept because it's fun to keep tabs on old employers.
     admiral = ['Admiral', 'https://jobs.ashbyhq.com/admiral?embed=js', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook', True]    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
     infotech = ['Infotech', 'https://recruiting.ultipro.com/INF1010INFT/JobBoard/a1f626ce-9a88-4c30-86ee-6562ee8ea030/?q=&o=postedDateDesc', 'a', False, 'class name', 'opportunity-link', False, 'NonsenseGobbledygook', True]  # Unable to fill out more/next button info as it wasn't present when the copany was tested.
@@ -404,7 +404,7 @@ def main():
     byppo = ['Byppo', 'https://www.byppo.com/byppo-careers-page', '', False, '', '', False, '', False]
     opie = ['OPIE Software', 'https://www.opiesoftware.com/careers', '', False, '', '', False, '', False]
     golok = ['Golok', 'https://golokglobal.com/jobs/', 'h2', False, 'class name', 'awsm-job-post-title', False, 'NonsenseGobbledygook', True]    # Unable to fill out more/next button info as it wasn't present when the copany was tested.
-    companies = [jagex, feathr] #, admiral, infotech,  mobiquity, byppo, opie, golok]
+    companies = [jagex, feathr, admiral, infotech] #,  mobiquity, byppo, opie, golok]
 
     # Validate that no two companies 'n' have the same name in companies[n][0].
     company_names = [company[0] for company in companies]
@@ -518,7 +518,7 @@ def desktop_scraper():
         company_profile_complete_Boolean (You can't scrape from a company if they have no listings from which to pull the relevant HTML info, but you can still schedule a daily notification with a link to their page. It reminds you to update the script with the HTML tag info if they list a job.)
     ]
     '''
-    new_company = ['Infotech', 'https://recruiting.ultipro.com/INF1010INFT/JobBoard/a1f626ce-9a88-4c30-86ee-6562ee8ea030/?q=&o=postedDateDesc', 'a', False, 'class name', 'opportunity-link', False, 'NonsenseGobbledygook']
+    new_company = ['Feathr', 'https://jobs.ashbyhq.com/feathr', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook']
     companies = [new_company]
 
     # Begin execution
