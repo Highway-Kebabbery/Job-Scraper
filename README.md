@@ -126,6 +126,7 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
     * To track new companies:
         * Check the company's robots.txt and respect their wishes.
         * Testing is easier on a Windows desktop. Comment out the main() entry point and uncomment the desktop_scraper() entry point.
+            * You MUST use BASH or a similar POSIX compliant environment.
         * Follow the instructions in the desktop_scraper() docstring to test the scraper on new companies.
         * In main(), create and fill out a new company attributes list and then add that list's name to `companies`.
         * Re-comment the desktop_scraper() entry point and uncomment the main() entry point after testing.
