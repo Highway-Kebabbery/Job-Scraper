@@ -522,7 +522,7 @@ def desktop_scraper():
         company_profile_complete_Boolean (You can't scrape from a company if they have no listings from which to pull the relevant HTML info, but you can still schedule a daily notification with a link to their page. It reminds you to update the script with the HTML tag info if they list a job.)
     ]
     '''
-    new_company = ['Dunlop', 'https://apply.workable.com/dunlop/', 'h3', True, 'class name', 'styles--3TJHk', False, 'text()="Show more"', True]
+    new_company = ['Feathr', 'https://jobs.ashbyhq.com/feathr', 'h3', False, 'class name', 'ashby-job-posting-brief-title', False, 'NonsenseGobbledygook', True]
     companies = [new_company]
 
     # Begin execution
