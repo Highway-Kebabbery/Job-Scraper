@@ -17,6 +17,7 @@ This application alerts users of updates to a specified company's (or companies'
 
 ### Planned:
 The application is currently only configured to target smaller companies with a relatively small number of job listings. Some of the following planned features will allow for targeting larger companies which may have a vast number of listings that are unrelated to the user.
+* Upgrade the app to send a notification when a company changes their careers page url so that you don't scrape their page for months without updates.
 * Filter job listings by specified keywords to narrow the search.
     * As a result, notifications could meaningfully contain the actual job titles available for application.
     * The drawback to this feature is that I may miss jobs that I am interested in if I do not use an expansive enough set of keyword filters. Even still, some interesting jobs may be missed.
