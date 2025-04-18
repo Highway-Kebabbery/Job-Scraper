@@ -4,14 +4,18 @@
 source $PREFIX/etc/profile.d/start-services.sh
 
 # You need to set a cron job in the crontab before you try to run sv-enable crond or sv up crond
-CRON_JOB="0 */3 * * * python /data/data/com.termux/files/home/Job-Scraper-*/src/scrape_jobs.py"    # Run the scraper every three hours.
 CRONJOB_FILE="/data/data/com.termux/files/home/crontab.tmp"
 
-crontab -l > "$CRONJOB_FILE"
+SCRAPE_CRON_JOB="0 */3 * * * python /data/data/com.termux/files/home/Job-Scraper-*/src/scrape_jobs.py"    # Run the scraper every three hours.
+DAILY_CRON_JOB="0 10 * * * /data/data/com.termux/files/home/Job-Scraper-*/src/scripts/_daily_notif_handler.sh"    # Run the daily notification handler daily at 1000 local time
 
-if ! grep -qF "$CRON_JOB" "$CRONJOB_FILE"; then
-    echo "$CRON_JOB" >> "$CRONJOB_FILE"
-fi
+crontab -l > "$CRONJOB_FILE" 2>/dev/null || true
+
+for job in "$SCRAPE_CRON_JOB" "$DAILY_CRON_JOB"; do
+    if ! grep -qxF "$job" "$CRONJOB_FILE"; then
+        echo "$job" >> "$CRONJOB_FILE"
+    fi
+done
 
 crontab "$CRONJOB_FILE"
 rm "$CRONJOB_FILE"
