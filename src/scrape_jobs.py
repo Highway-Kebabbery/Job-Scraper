@@ -418,7 +418,7 @@ def main():
 
     # Begin execution
     this_execution = ThisExecution(
-        project_version='1.0.0',
+        project_version='1.0.1',
         fast_notifications=False
         )
     execution_logger = LogExecution(
