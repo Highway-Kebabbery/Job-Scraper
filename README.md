@@ -105,6 +105,9 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
 
 12. Setup is complete once Termux has been completely exited.
 
+#### Tasker:
+It is recommended to use Tasker to reliably start Termux without user input after a device restart. Create a Tasker task to launch Termux on device startup and to acquire wake lock for Termux, as well. Android aggressively kills background processes. Without wake lock, the script may go 12 hours or more without running in extreme cases, though it usually only blacks out for 2-3 hours at a time.
+
 ### Operation:
 **Notes:** If for any reason a file is moved out and back in to the parent directory on the mobile device, you will need to reset permissions for that file. `chmod 700 -R <parent_directory>` will set permissions for all files/directories when run from the home directory.
 
