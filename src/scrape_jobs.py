@@ -292,7 +292,7 @@ class CompanyJobsFinder():
         """Builds the shell script to send the daily notification.
         """
         with open(self.__notification_script_filepath, 'w') as file:
-            file.write(f'{self.__bash_shebang}\n\n{self.__notification_command}\n\n')
+            file.write(f'{self.__bash_shebang}\n\nexport PATH=$PATH:/data/data/com.termux/files/usr/bin\n\n{self.__notification_command}\n\n')
             file.close()
         os.system(f'chmod 700 {self.__notification_script_filepath}')
 
