@@ -1,7 +1,7 @@
 # <div align="center">Job Scraper</div>
 
 ## Description
-This application alerts users of updates to a specified company's (or companies') "Careers" page via notifications on their Android phone. This is acheived by using Termux, Selenium, and Beautiful Soup on an Android phone to scrape web content, by using `cronie` to schedule Python script execution in Termux, and by using the `at` service to schedule single-occurrence events such as sending notifications to the user's phone. 
+This application alerts users of updates to a specified company's (or companies') "Careers" page via notifications on their Android phone. This is acheived by using Termux, Selenium, and Beautiful Soup on an Android phone to scrape web content and by using `cron` to schedule Python script execution in Termux both to run the job scraper and to execute a daily notification. Notifications are sent to the user's phone once per day for each company that is monitored with a summary of the previous day's findings as well as once per execution for the remainder of the day after a new job is listed at a targeted company.
 
 **Note:** This application does **not** require rooting of the Android phone.
 
@@ -150,10 +150,10 @@ If you have trouble, you may optionally check out [this guide](https://imgur.com
     * **Selenium:** Selenium was required to deal with dynamically loaded webpages. It allows me to wait to collect the html until everything I need has loaded, and it is also a widely used and well-vetted tool for this job.
     * **Beautiful Soup:** Beautiful Soup is a widely-used library for parsing html. 
 * **Termux:** Termux is an emulated command line providing a Linux environment on an Android phone. I chose to implement this application with Termux because it has tools to execute functions like periodic background execution and scheduling, it does not require rooting the Android device, and, although I did have a lot to learn about using the Linux functions available on Termux, I did not need to learn about native Android development. Furthermore, using Termux allowed me to host this application on my phone, which means that I do not need to leave my computer on 24/7 to run such a simple task. It is incredibly convenient.
-    * **`cronie`:** The `cron(ie)` package allows for *periodic* scheduling of tasks. *i.e.* Executing the web scraper every 3 hours.
-    * **`at`:** The `at` package allows for the scheduling of single-occurrence events, such as sending the daily notifications at 1000 and subsequently cleaning up the shell scripts that sent them.
-* **Bash:** Bash shell scripts were used to to automate the setup of the Termux environment upon installation, to set up the cronjob that runs the application, and to store instructions for notifications to be executed after the Python script finished executing.
+    * **`cronie`:** The `cron(ie)` package allows for *periodic* scheduling of tasks. *i.e.* Executing the web scraper every 3 hours or running the daily notification python script each morning at 1000.
+* **Bash:** Bash shell scripts were used to to automate the setup of the Termux environment upon installation and to set up the cronjobs that run the application.
 * **JSON:** .json files were a natural choice for storing the results of each execution for comparison at a later time.
+* **Text:** Text files were used to store Termux commands to be accessed later byy the daily notification python script.
 
 *****
 *****
@@ -164,6 +164,7 @@ Given that I was already familiar with Python, many of the most challenging part
 **Termux/Linux:**
 
 I learned:
+* Termux provides different, limited context and abilities to cron jobs as compared to python scripts calling os.system(). An older version of this project largely failed to reliably generate daily notifications because of this. What was previously a shell script scheduled to execute at 1000 each day using `at` was first changed to a shell script scheduled by `cron`, but when that failed, too, it was changed to a python script called by `cron` like the main job scraper script.
 * How to update the Termux source repository/mirrors.
 * How to configure the Termux environment to run Python, Selenium, and Beautiful Soup.
 * How to set permissions for files and directories.
@@ -174,7 +175,7 @@ I learned:
     * How to push crontab to a file and back for controlled editing
     * That `cron` runs out of a different directory than when a script is executed manually. Set filepaths accordingly.
     * That cronjobs of the type `0 */3 * * *` run in three-hour intervals *in relation to midnight*, regardless of when they're started.
-* How to schedule a job with `at`.
+* How to schedule a job with `at` (even though it's horribly unreliable on Termux).
 * That Termux is still up on the Google Play Store even though this version is non-functional due to a severe lack of packages and discontinued support.
 
 **Python:**
