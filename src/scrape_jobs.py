@@ -103,7 +103,7 @@ class CompanyJobsFinder():
         self.__company_data_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/data/{self.__hyphenated_company_name}.json'
         self.__no_job_jpg_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/media/no_job.jpg'
         self.__job_jpg_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/media/job.jpg'
-        self.__notification_script_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/scripts/daily_notify_{self.__hyphenated_company_name}.sh'
+        self.__notification_script_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/scripts/daily-scripts/daily_notify_{self.__hyphenated_company_name}.sh'
         
         self.__set_firefox_driver()
 
@@ -284,31 +284,33 @@ class CompanyJobsFinder():
         # Send the notification
         if (notif_type == 'daily') or (notif_type == 'cannot_scrape'):
             self.__build_notif_shell_script()
-            self.__schedule_daily_notification()
+            #self.__schedule_daily_notification()    # See note above __schedule_daily_notification(). This line can be removed when the new daily notification system is successfully implemented.
         else:
             os.system(f'{self.__notification_command}')
 
     def __build_notif_shell_script(self):
-        """Builds the shell script to send the daily notification at the scheduled time.
+        """Builds the shell script to send the daily notification.
         """
         with open(self.__notification_script_filepath, 'w') as file:
             file.write(f'{self.__bash_shebang}\n\n{self.__notification_command}\n\n')
             file.close()
         os.system(f'chmod 700 {self.__notification_script_filepath}')
 
-    def __schedule_daily_notification(self):
-        """Schedule the daily notification
-        """
-        if self.__fast_notifications == False:
-            notification_time = datetime.now().replace(hour=10, minute=0, second=0, microsecond=0)
-        else:
-            # __fast_notifications allows for quick testing of daily notifications.
-            notification_time = datetime.now() + timedelta(minutes=1)
-
-        os.system('sv-enable atd')    # enable at daemon
-        os.system('sv up atd')    # start at service for one job
-        os.system(f'echo "{self.__notification_script_filepath}" | at {notification_time.strftime("%H:%M %m/%d/%Y")}')
-        os.system(f'echo "rm {self.__notification_script_filepath}" | at {(notification_time + timedelta(minutes=1)).strftime("%H:%M %m/%d/%Y")}')    # Clean up script after use
+# This method is likely obselete given the new implementation of daily notifications. Dead code can be removed after success is confirmed.
+#
+#    def __schedule_daily_notification(self):
+#        """Schedule the daily notification
+#        """
+#        if self.__fast_notifications == False:
+#            notification_time = datetime.now().replace(hour=10, minute=0, second=0, microsecond=0)
+#        else:
+#            # __fast_notifications allows for quick testing of daily notifications.
+#            notification_time = datetime.now() + timedelta(minutes=1)
+#
+#        os.system('sv-enable atd')    # enable at daemon
+#        os.system('sv up atd')    # start at service for one job
+#        os.system(f'echo "{self.__notification_script_filepath}" | at {notification_time.strftime("%H:%M %m/%d/%Y")}')
+#        os.system(f'echo "rm {self.__notification_script_filepath}" | at {(notification_time + timedelta(minutes=1)).strftime("%H:%M %m/%d/%Y")}')    # Clean up script after use
 
 class LogExecution():
     """A class to handle logging the execution of the program.
