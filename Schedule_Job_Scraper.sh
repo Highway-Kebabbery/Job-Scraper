@@ -7,7 +7,7 @@ source $PREFIX/etc/profile.d/start-services.sh
 CRONJOB_FILE="/data/data/com.termux/files/home/crontab.tmp"
 
 SCRAPE_CRON_JOB="0 */3 * * * python /data/data/com.termux/files/home/Job-Scraper-*/src/scrape_jobs.py"    # Run the scraper every three hours.
-DAILY_CRON_JOB="0 10 * * * /data/data/com.termux/files/home/Job-Scraper-*/src/scripts/_daily_notif_handler.sh"    # Run the daily notification handler daily at 1000 local time
+DAILY_CRON_JOB="0 10 * * * python /data/data/com.termux/files/home/Job-Scraper-*/src/scripts/_daily_notif_handler.py"    # Run the daily notification handler daily at 1000 local time
 
 crontab -l > "$CRONJOB_FILE" 2>/dev/null || true
 

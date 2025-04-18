@@ -103,7 +103,7 @@ class CompanyJobsFinder():
         self.__company_data_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/data/{self.__hyphenated_company_name}.json'
         self.__no_job_jpg_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/media/no_job.jpg'
         self.__job_jpg_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/media/job.jpg'
-        self.__notification_script_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/scripts/daily-scripts/daily_notify_{self.__hyphenated_company_name}.sh'
+        self.__notification_script_filepath = f'/{self.__wd}/Job-Scraper-{self.__project_version}/src/scripts/daily-notif-cmds/daily_notify_{self.__hyphenated_company_name}.txt'
         
         self.__set_firefox_driver()
 
@@ -292,7 +292,7 @@ class CompanyJobsFinder():
         """Builds the shell script to send the daily notification.
         """
         with open(self.__notification_script_filepath, 'w') as file:
-            file.write(f'{self.__bash_shebang}\n\nexport PATH=$PATH:/data/data/com.termux/files/usr/bin\n\n{self.__notification_command}\n\n')
+            file.write(f'{self.__notification_command}')
             file.close()
         os.system(f'chmod 700 {self.__notification_script_filepath}')
 
